@@ -8,53 +8,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class ServiceRequest
  *
- * Основная модель заявки ServiceFlow.
- *
- * Заявка проходит через стадии pipeline
- * и фиксирует бизнес-процесс внутри системы.
- *
- * Примеры:
- *
- * IT заявка
- * HR заявка
- * Финансовое согласование
- * Запрос оборудования
- *
- * @property int $id Уникальный идентификатор заявки
- * @property int $organization_id Организация (tenant)
- * @property int $pipeline_id Воронка процесса
- * @property int $stage_id Текущая стадия
- * @property int $created_by Автор заявки
- * @property int|null $assigned_to Ответственный сотрудник
- * @property string $title Заголовок заявки
- * @property string|null $description Описание
- * @property string $status Статус заявки
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- *
- * Связи модели:
- *
- * @property Organization $organization
- * @property Pipeline $pipeline
- * @property Stage $stage
- * @property User $creator
- * @property User|null $assignee
+ * Основная модель заявки системы ServiceFlow.
  */
 class ServiceRequest extends Model
 {
-    protected $fillable = [
-        'organization_id',
-        'pipeline_id',
-        'stage_id',
-        'created_by',
-        'assigned_to',
-        'title',
-        'description',
-        'status'
-    ];
+    /**
+     * Таблица заявок
+     */
+    protected $table = 'requests';
 
     /**
-     * Организация заявки.
+     * Разрешаем массовое заполнение
+     */
+    protected $guarded = [];
+
+    /**
+     * Организация заявки
      */
     public function organization(): BelongsTo
     {
@@ -62,7 +31,15 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Воронка процесса.
+     * Тип процесса
+     */
+    public function requestType(): BelongsTo
+    {
+        return $this->belongsTo(RequestType::class);
+    }
+
+    /**
+     * Воронка процесса
      */
     public function pipeline(): BelongsTo
     {
@@ -70,7 +47,7 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Текущая стадия заявки.
+     * Стадия заявки
      */
     public function stage(): BelongsTo
     {
@@ -78,7 +55,7 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Автор заявки.
+     * Автор заявки
      */
     public function creator(): BelongsTo
     {
@@ -86,7 +63,7 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Ответственный исполнитель.
+     * Исполнитель
      */
     public function assignee(): BelongsTo
     {

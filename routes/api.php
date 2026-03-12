@@ -1,7 +1,14 @@
 <?php
 
-use App\Http\Controllers\Api\PipelineController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RequestController;
+use App\Http\Controllers\Api\PipelineController;
 
-Route::get('/pipelines/{id}', [PipelineController::class, 'show']);
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/requests', [RequestController::class, 'index']);
+Route::get('/pipelines/{id}', [PipelineController::class, 'show']);
