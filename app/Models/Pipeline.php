@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * через которые проходит заявка.
  *
  * Пример:
+ *
  * IT Support:
  *   1. Новая заявка
  *   2. В работе
@@ -22,21 +23,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *   4. Закрыта
  *
  * Каждая воронка:
+ *
  * - принадлежит организации (multi-tenant)
  * - связана с типом процесса
  * - содержит набор стадий
  *
- * @property int $id / уникальный идентификатор воронки
- * @property int $organization_id / организация (tenant системы)
- * @property int $request_type_id / тип процесса (IT, HR, Finance и т.д.)
- * @property string $name / название воронки
- * @property \Illuminate\Support\Carbon|null $created_at / дата создания
- * @property \Illuminate\Support\Carbon|null $updated_at / дата обновления
+ * @property int $id Уникальный идентификатор воронки
+ * @property int $organization_id Организация (tenant системы)
+ * @property int $request_type_id Тип процесса (IT, HR, Finance и т.д.)
+ * @property string $name Название воронки
+ * @property \Illuminate\Support\Carbon|null $created_at Дата создания
+ * @property \Illuminate\Support\Carbon|null $updated_at Дата обновления
  *
  * Связи модели:
  *
- * @property \Illuminate\Database\Eloquent\Collection|Stage[] $stages / стадии данной воронки
- * @property RequestType $requestType / тип процесса
+ * @property Organization $organization Организация
+ * @property RequestType $requestType Тип процесса
+ * @property \Illuminate\Database\Eloquent\Collection|Stage[] $stages Стадии данной воронки
+ * @property \Illuminate\Database\Eloquent\Collection|ServiceRequest[] $requests Заявки в данной воронке
  */
 class Pipeline extends Model
 {
@@ -52,6 +56,16 @@ class Pipeline extends Model
     ];
 
     /**
+     * Связь с организацией (tenant).
+     *
+     * @return BelongsTo
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    /**
      * Стадии воронки.
      *
      * Возвращает стадии, отсортированные по позиции.
@@ -65,12 +79,22 @@ class Pipeline extends Model
     }
 
     /**
-     * Тип процесса, к которому относится воронка.
+     * Тип процесса.
      *
      * @return BelongsTo
      */
     public function requestType(): BelongsTo
     {
         return $this->belongsTo(RequestType::class);
+    }
+
+    /**
+     * Заявки данной воронки.
+     *
+     * @return HasMany
+     */
+    public function requests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class);
     }
 }

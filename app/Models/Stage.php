@@ -22,18 +22,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * approval     → согласование
  * completed    → завершено
  *
- * @property int $id / уникальный идентификатор стадии
- * @property int $pipeline_id / воронка к которой относится стадия
- * @property string $name / название стадии
- * @property int $position / позиция стадии в воронке (порядок этапов)
- * @property string $type / тип стадии (start, process, approval, end)
- * @property \Illuminate\Support\Carbon|null $created_at / дата создания
- * @property \Illuminate\Support\Carbon|null $updated_at / дата обновления
+ * @property int $id Уникальный идентификатор стадии
+ * @property int $pipeline_id Воронка к которой относится стадия
+ * @property string $name Название стадии
+ * @property int $position Позиция стадии в воронке (порядок этапов)
+ * @property string $type Тип стадии (start, process, approval, end)
+ * @property \Illuminate\Support\Carbon|null $created_at Дата создания
+ * @property \Illuminate\Support\Carbon|null $updated_at Дата обновления
  *
  * Связи модели:
  *
- * @property Pipeline $pipeline / воронка процесса
- * @property \Illuminate\Database\Eloquent\Collection|RequestModel[] $requests / заявки находящиеся на этой стадии
+ * @property Pipeline $pipeline Воронка процесса
+ * @property \Illuminate\Database\Eloquent\Collection|ServiceRequest[] $requests Заявки на данной стадии
  */
 class Stage extends Model
 {
@@ -70,6 +70,6 @@ class Stage extends Model
      */
     public function requests(): HasMany
     {
-        return $this->hasMany(RequestModel::class);
+        return $this->hasMany(ServiceRequest::class);
     }
 }
