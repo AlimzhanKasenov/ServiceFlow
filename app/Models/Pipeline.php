@@ -4,33 +4,29 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Pipeline
  *
- * Модель pipeline (воронки процессов).
- *
- * Pipeline определяет последовательность стадий,
- * по которым проходит заявка.
- *
- * Пример pipeline:
- *
- * HR Recruitment
- * IT Support
- * Finance Approval
- *
- * Таблица: pipelines
- *
- * @property int $id
- * @property string $name
- * @property string|null $description
+ * Воронка процесса ServiceFlow.
+ * Определяет набор стадий обработки заявок.
  */
 class Pipeline extends Model
 {
-    protected $fillable = [
-        'name',
-        'description'
-    ];
+    /**
+     * Отключаем защиту массового заполнения
+     * (для dev режима удобно)
+     */
+    protected $guarded = [];
+
+    /**
+     * Pipeline принадлежит организации
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
 
     /**
      * Стадии pipeline
@@ -38,13 +34,5 @@ class Pipeline extends Model
     public function stages(): HasMany
     {
         return $this->hasMany(Stage::class);
-    }
-
-    /**
-     * Права pipeline
-     */
-    public function permissions(): HasMany
-    {
-        return $this->hasMany(PipelinePermission::class);
     }
 }
