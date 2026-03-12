@@ -14,7 +14,7 @@ Enterprise Workflow Engine for Internal Service Processes
 <img src="https://img.shields.io/badge/Vue-3-green">
 <img src="https://img.shields.io/badge/PostgreSQL-Database-blue">
 <img src="https://img.shields.io/badge/Docker-Containerization-blue">
-<img src="https://img.shields.io/badge/License-MIT-green">
+<img src="https://img.shields.io/badge/License-Proprietary-red">
 </p>
 
 ---
