@@ -8,6 +8,8 @@ use App\Models\StageTransition;
 use App\Models\RequestStageHistory;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use App\Models\PipelinePermission;
+use App\Models\User;
 
 /**
  * Class StageManager
@@ -85,5 +87,22 @@ class StageManager
 
             return $request->fresh();
         });
+    }
+
+    /**
+     * Проверка прав пользователя на pipeline
+     */
+    protected function checkPipelinePermission(int $userId, Request $request): void
+    {
+        $user = User::findOrFail($userId);
+
+        $permission = PipelinePermission::query()
+            ->where('pipeline_id', $request->pipeline_id)
+            ->where('role_id', $user->role_id)
+            ->first();
+
+        if (!$permission || !$permission->can_move) {
+            throw new \Exception('User cannot move request in this pipeline');
+        }
     }
 }
