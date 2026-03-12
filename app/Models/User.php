@@ -106,4 +106,30 @@ class User extends Authenticatable
     {
         return $this->hasMany(RequestModel::class, 'assigned_to');
     }
+
+    /**
+     * Роль пользователя
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Проверка разрешения пользователя
+     *
+     * @param string $permissionCode
+     * @return bool
+     */
+    public function hasPermission(string $permissionCode): bool
+    {
+        if (!$this->role) {
+            return false;
+        }
+
+        return $this->role
+            ->permissions()
+            ->where('code', $permissionCode)
+            ->exists();
+    }
 }
