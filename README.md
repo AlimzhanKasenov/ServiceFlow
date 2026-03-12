@@ -355,3 +355,8 @@ This Software may not be used, reproduced, modified or distributed
 in any form without explicit written consent from the author.
 
 Violation of these terms may result in legal liability under applicable law.
+
+## License
+
+Proprietary License  
+© 2026 Alimzhan Kassenov. All rights reserved.
