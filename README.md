@@ -301,8 +301,56 @@ Start server
 php artisan serve
 ```
 
----
+ServiceFlow Proprietary License
+Лицензия на программное обеспечение ServiceFlow
 
-# License
+Copyright (c) 2026 Alimzhan Kassenov
+Все права защищены.
 
-MIT
+------------------------------------------------------------------
+РУССКАЯ ВЕРСИЯ
+------------------------------------------------------------------
+
+Настоящее программное обеспечение "ServiceFlow", включая исходный код,
+архитектуру, документацию и связанные файлы (далее — "Программное обеспечение"),
+является интеллектуальной собственностью автора.
+
+Автор: Alimzhan Kassenov
+
+Любое использование Программного обеспечения без явного письменного
+разрешения автора запрещено.
+
+Без письменного разрешения автора запрещается:
+
+- копировать исходный код
+- изменять программное обеспечение
+- распространять программное обеспечение
+- публиковать программное обеспечение
+- продавать или использовать программное обеспечение в коммерческих целях
+- создавать производные проекты на основе данного программного обеспечения
+
+Использование данного программного обеспечения допускается только
+с письменного разрешения автора.
+
+Нарушение данных условий может повлечь за собой юридическую ответственность
+в соответствии с применимым законодательством.
+
+------------------------------------------------------------------
+ENGLISH VERSION
+------------------------------------------------------------------
+
+ServiceFlow and its source code, architecture, documentation and
+associated files (the "Software") are the intellectual property of the author.
+
+Author: Alimzhan Kassenov
+
+All rights reserved.
+
+Unauthorized copying, modification, distribution, publication,
+sublicensing, selling or commercial use of this Software is strictly
+prohibited without prior written permission from the author.
+
+This Software may not be used, reproduced, modified or distributed
+in any form without explicit written consent from the author.
+
+Violation of these terms may result in legal liability under applicable law.
