@@ -105,4 +105,44 @@ class StageManager
             throw new \Exception('User cannot move request in this pipeline');
         }
     }
+
+    /**
+     * Проверка условий перехода
+     */
+    protected function checkConditions(StageTransition $transition, Request $request): void
+    {
+        foreach ($transition->conditions as $condition) {
+
+            $fieldValue = $request->{$condition->field};
+
+            $expected = $condition->value;
+
+            switch ($condition->operator) {
+
+                case '=':
+                    if ($fieldValue != $expected) {
+                        throw new \Exception('Condition failed');
+                    }
+                    break;
+
+                case '!=':
+                    if ($fieldValue == $expected) {
+                        throw new \Exception('Condition failed');
+                    }
+                    break;
+
+                case '>':
+                    if ($fieldValue <= $expected) {
+                        throw new \Exception('Condition failed');
+                    }
+                    break;
+
+                case '<':
+                    if ($fieldValue >= $expected) {
+                        throw new \Exception('Condition failed');
+                    }
+                    break;
+            }
+        }
+    }
 }
