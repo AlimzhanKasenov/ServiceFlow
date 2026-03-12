@@ -21,8 +21,19 @@ class PipelineController extends Controller
             )
         ]
     )]
+
     public function index(): JsonResponse
     {
         return response()->json(Pipeline::all());
+    }
+
+    /**
+     * Pipeline со стадиями
+     */
+    public function show(int $id): JsonResponse
+    {
+        $pipeline = Pipeline::with('stages')->findOrFail($id);
+
+        return response()->json($pipeline);
     }
 }
