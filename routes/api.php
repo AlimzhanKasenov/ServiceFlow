@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\RequestMoveController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\PipelineController;
@@ -13,3 +14,4 @@ use App\Http\Controllers\Api\PipelineController;
 Route::get('/requests', [RequestController::class, 'index']);
 Route::get('/pipelines/{id}', [PipelineController::class, 'show']);
 Route::post('/requests/{id}/move', [RequestController::class, 'move']);
+Route::post('/requests/{request}/move', [RequestMoveController::class, 'move']);

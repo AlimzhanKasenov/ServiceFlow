@@ -5,10 +5,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Таблица переходов между стадиями процесса.
+ * Class CreateStageTransitionsTable
  *
- * StageTransition определяет разрешённые переходы
- * между стадиями внутри pipeline.
+ * Таблица описывает допустимые переходы между стадиями workflow.
  *
  * Пример:
  *
@@ -16,8 +15,10 @@ use Illuminate\Support\Facades\Schema;
  * processing → approval
  * approval → completed
  *
- * Это позволяет строить workflow и валидировать
- * движение заявки между этапами.
+ * Система использует эту таблицу чтобы:
+ * - проверять допустимость переходов
+ * - строить workflow
+ * - валидировать перемещение заявок
  */
 return new class extends Migration
 {
@@ -31,21 +32,21 @@ return new class extends Migration
             $table->id();
 
             /**
-             * Pipeline которому принадлежит переход
+             * Pipeline к которому относится переход
              */
             $table->foreignId('pipeline_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
             /**
-             * Стадия ОТКУДА происходит переход
+             * Стадия ИЗ которой происходит переход
              */
             $table->foreignId('from_stage_id')
                 ->constrained('stages')
                 ->cascadeOnDelete();
 
             /**
-             * Стадия КУДА происходит переход
+             * Стадия В которую происходит переход
              */
             $table->foreignId('to_stage_id')
                 ->constrained('stages')
@@ -53,8 +54,12 @@ return new class extends Migration
 
             /**
              * Название перехода
+             *
+             * Пример:
+             * "Отправить на согласование"
+             * "Закрыть заявку"
              */
-            $table->string('name');
+            $table->string('name')->nullable();
 
             /**
              * Требуется ли согласование
@@ -63,12 +68,21 @@ return new class extends Migration
                 ->default(false);
 
             /**
-             * Позиция для UI
+             * Позиция перехода
+             * (для UI порядка кнопок)
              */
             $table->integer('position')
                 ->default(0);
 
             $table->timestamps();
+
+            /**
+             * Индексы
+             */
+            $table->index(['pipeline_id']);
+            $table->index(['from_stage_id']);
+            $table->index(['to_stage_id']);
+
         });
     }
 
