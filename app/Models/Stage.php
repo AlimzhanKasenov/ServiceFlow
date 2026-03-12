@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\StageTransition;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Stage
@@ -71,5 +72,28 @@ class Stage extends Model
     public function requests(): HasMany
     {
         return $this->hasMany(ServiceRequest::class);
+    }
+
+    /**
+     * Переходы ИЗ текущей стадии
+     *
+     * Например:
+     * Processing → Approval
+     * Processing → Done
+     */
+    public function outgoingTransitions(): HasMany
+    {
+        return $this->hasMany(StageTransition::class, 'from_stage_id');
+    }
+
+    /**
+     * Переходы В текущую стадию
+     *
+     * Например:
+     * New → Processing
+     */
+    public function incomingTransitions(): HasMany
+    {
+        return $this->hasMany(StageTransition::class, 'to_stage_id');
     }
 }
