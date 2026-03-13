@@ -22,6 +22,15 @@ export default {
     async getRequest(id) {
         const { data } = await axios.get(`/api/requests/${id}`)
         return data
-    }
+    },
 
+    getComments(requestId) {
+        return axios.get(`/api/requests/${requestId}/comments`)
+    },
+
+    addComment(requestId, message) {
+        return axios.post(`/api/requests/${requestId}/comments`, {
+            message
+        })
+    }
 }

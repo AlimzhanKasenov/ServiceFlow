@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\TransitionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\PipelineController;
+use App\Http\Controllers\Api\RequestCommentController;
 
 Route::get('/requests', [RequestController::class, 'index']);
 Route::get('/pipelines/{id}', [PipelineController::class, 'show']);
@@ -12,3 +13,5 @@ Route::post('/requests/{serviceRequest}/move', [RequestController::class, 'move'
 Route::get('/stages/{stage}/transitions', [TransitionController::class, 'index']);
 Route::post('/requests', [RequestController::class, 'store']);
 Route::get('/requests/{id}', [RequestController::class, 'show']);
+Route::get('/requests/{id}/comments', [RequestCommentController::class, 'index']);
+Route::post('/requests/{id}/comments', [RequestCommentController::class, 'store']);
