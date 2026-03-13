@@ -30,7 +30,7 @@ class PipelineController extends Controller
     /**
      * Показать pipeline вместе со стадиями и заявками
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
         $pipeline = Pipeline::with([
             'stages.requests'

@@ -2,13 +2,21 @@
 
     <div class="stage">
 
-        <h3>{{ stage.name }}</h3>
+        <div class="stage-header">
+
+            {{ stage.name }}
+
+            <span class="count">
+            {{ stage.requests?.length || 0 }}
+        </span>
+
+        </div>
 
         <draggable
             :list="stage.requests"
             group="requests"
             item-key="id"
-            @end="onMove"
+            @change="onMove"
         >
 
             <template #item="{ element }">
@@ -29,24 +37,17 @@ import draggable from 'vuedraggable'
 import RequestCard from './RequestCard.vue'
 import { useRequestStore } from '../stores/requestStore'
 
-/**
- * props
- */
 const props = defineProps({
     stage: Object
 })
 
-/**
- * store
- */
 const store = useRequestStore()
 
-/**
- * обработка перемещения карточки
- */
-function onMove(evt) {
+function onMove(evt){
 
-    const request = evt.item.__draggable_context.element
+    if(!evt.added) return
+
+    const request = evt.added.element
 
     store.moveRequest(request.id, props.stage.id)
 
@@ -56,11 +57,24 @@ function onMove(evt) {
 
 <style>
 
-.stage {
-    width: 300px;
-    background: #f4f5f7;
-    padding: 10px;
-    border-radius: 6px;
+.stage{
+    width:320px;
+    background:#e9ecef;
+    border-radius:10px;
+    padding:10px;
+}
+
+.stage-header{
+    font-weight:600;
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.count{
+    background:#dee2e6;
+    padding:2px 8px;
+    border-radius:10px;
 }
 
 </style>

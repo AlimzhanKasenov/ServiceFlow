@@ -18,9 +18,21 @@ class ServiceRequest extends Model
     protected $table = 'requests';
 
     /**
-     * Разрешаем массовое заполнение
+     * Разрешённые поля для массового заполнения
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'title',
+        'stage_id',
+        'pipeline_id',
+        'organization_id',
+        'request_type_id',
+        'status',
+        'created_by',
+        'assigned_to',
+        'description',
+        'priority',
+        'data',
+    ];
 
     /**
      * Организация заявки

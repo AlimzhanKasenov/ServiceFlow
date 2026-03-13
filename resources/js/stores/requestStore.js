@@ -17,6 +17,11 @@ export const useRequestStore = defineStore('requests', {
         async moveRequest(requestId, stageId) {
             await requestApi.moveRequest(requestId, stageId)
             await this.loadPipeline()
+        },
+
+        async createRequest(title, stageId) {
+            await requestApi.createRequest(title, stageId)
+            await this.loadPipeline()
         }
 
     }

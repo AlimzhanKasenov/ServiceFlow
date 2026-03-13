@@ -1,18 +1,26 @@
 <template>
 
-    <div v-if="pipeline" class="kanban">
+    <div class="kanban-wrapper">
 
-        <StageColumn
-            v-for="stage in pipeline.stages"
-            :key="stage.id"
-            :stage="stage"
-        />
+        <div class="kanban-header">
 
-    </div>
+            <h2>ServiceFlow</h2>
 
-    <div v-else class="loading">
+            <button class="create-btn" @click="createRequest">
+                + Create Request
+            </button>
 
-        Loading pipeline...
+        </div>
+
+        <div v-if="pipeline" class="kanban">
+
+            <StageColumn
+                v-for="stage in pipeline.stages"
+                :key="stage.id"
+                :stage="stage"
+            />
+
+        </div>
 
     </div>
 
@@ -24,40 +32,61 @@ import {computed, onMounted} from 'vue'
 import {useRequestStore} from '../stores/requestStore'
 import StageColumn from './StageColumn.vue'
 
-/**
- * Подключаем Pinia store
- */
 const store = useRequestStore()
 
-/**
- * Делаем pipeline реактивным
- */
 const pipeline = computed(() => store.pipeline)
 
-/**
- * При загрузке компонента
- * загружаем pipeline из API
- */
 onMounted(() => {
-
     store.loadPipeline()
-
 })
+
+function createRequest() {
+
+    const title = prompt('Request title')
+
+    if (!title) return
+
+    store.createRequest(title, 1)
+
+}
 
 </script>
 
 <style>
 
-.kanban {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
+body {
+    margin: 0;
+    font-family: system-ui;
+    background: #f1f3f5;
+}
+
+.kanban-wrapper {
     padding: 20px;
 }
 
-.loading {
-    padding: 20px;
-    font-size: 18px;
+.kanban-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.create-btn {
+    background: #4f46e5;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.create-btn:hover {
+    background: #4338ca;
+}
+
+.kanban {
+    display: flex;
+    gap: 20px;
 }
 
 </style>

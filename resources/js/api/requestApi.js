@@ -10,6 +10,13 @@ export default {
         return axios.post(`/api/requests/${requestId}/move`, {
             stage_id: stageId
         })
+    },
+
+    createRequest(title, stageId) {
+        return axios.post(`/api/requests`, {
+            title: title,
+            stage_id: stageId
+        })
     }
 
 }
