@@ -87,14 +87,17 @@ class RequestController extends Controller
     }
 
     /**
-     * Получить одну заявку
+     * Получить карточку заявки
      */
-    public function show(int $id)
+    public function show($id)
     {
         $request = ServiceRequest::with([
             'stage',
+            'pipeline',
             'creator',
-            'assignee'
+            'assignee',
+            'comments.user',
+            'activities.user'
         ])->findOrFail($id);
 
         return response()->json($request);

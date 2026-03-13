@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RequestMoveController;
 use App\Http\Controllers\Api\TransitionController;
 use App\Http\Controllers\Api\PipelineController;
 use App\Http\Controllers\Api\RequestCommentController;
+use App\Http\Controllers\Api\RequestActivityController;
 
 /*
 | Заявки
@@ -14,6 +15,7 @@ use App\Http\Controllers\Api\RequestCommentController;
 Route::get('/requests', [RequestController::class, 'index']);
 Route::post('/requests', [RequestController::class, 'store']);
 Route::get('/requests/{id}', [RequestController::class, 'show']);
+
 
 /*
 | Перемещение заявки по стадиям
@@ -35,3 +37,8 @@ Route::get('/stages/{stage}/transitions', [TransitionController::class, 'index']
 */
 Route::get('/requests/{id}/comments', [RequestCommentController::class, 'index']);
 Route::post('/requests/{id}/comments', [RequestCommentController::class, 'store']);
+
+/*
+| История действий заявки
+*/
+Route::get('/requests/{id}/activities', [RequestActivityController::class, 'index']);
