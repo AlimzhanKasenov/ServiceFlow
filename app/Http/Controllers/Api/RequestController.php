@@ -51,22 +51,22 @@ class RequestController extends Controller
     public function move(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
         $data = $request->validate([
-            'stage_id' => ['required', 'exists:stages,id'],
+            'stage_id' => ['required', 'exists:stages,id']
         ]);
 
         $fromStageId = $serviceRequest->stage_id;
         $toStageId = $data['stage_id'];
 
-        $transition = StageTransition::query()
-            ->where('from_stage_id', $fromStageId)
-            ->where('to_stage_id', $toStageId)
-            ->first();
+        /**
+         * В режиме разработки разрешаем любые переходы
+         * (ограничения добавим позже через permissions)
+         */
 
-        if (!$transition) {
+        if ($fromStageId == $toStageId) {
             return response()->json([
-                'success' => false,
-                'message' => 'Transition not allowed',
-            ], 422);
+                'success' => true,
+                'request' => $serviceRequest
+            ]);
         }
 
         $serviceRequest->stage_id = $toStageId;
@@ -77,12 +77,12 @@ class RequestController extends Controller
             'action' => 'stage_changed',
             'from_stage_id' => $fromStageId,
             'to_stage_id' => $toStageId,
-            'user_id' => 1,
+            'user_id' => 1
         ]);
 
         return response()->json([
             'success' => true,
-            'request' => $serviceRequest->fresh(),
+            'request' => $serviceRequest->fresh()
         ]);
     }
 }

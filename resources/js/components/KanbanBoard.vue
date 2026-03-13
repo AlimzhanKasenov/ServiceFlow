@@ -4,7 +4,7 @@
 
         <div class="kanban-header">
 
-            <h2>ServiceFlow</h2>
+            <h1>ServiceFlow</h1>
 
             <button class="create-btn" @click="createRequest">
                 + Create Request
@@ -28,8 +28,8 @@
 
 <script setup>
 
-import {computed, onMounted} from 'vue'
-import {useRequestStore} from '../stores/requestStore'
+import { computed, onMounted } from 'vue'
+import { useRequestStore } from '../stores/requestStore'
 import StageColumn from './StageColumn.vue'
 
 const store = useRequestStore()
@@ -40,11 +40,11 @@ onMounted(() => {
     store.loadPipeline()
 })
 
-function createRequest() {
+function createRequest(){
 
     const title = prompt('Request title')
 
-    if (!title) return
+    if(!title) return
 
     store.createRequest(title, 1)
 
@@ -54,39 +54,45 @@ function createRequest() {
 
 <style>
 
-body {
-    margin: 0;
-    font-family: system-ui;
-    background: #f1f3f5;
+body{
+    margin:0;
+    font-family:system-ui;
+    background:#eef1f5;
 }
 
-.kanban-wrapper {
-    padding: 20px;
+.kanban-wrapper{
+    padding:25px;
 }
 
-.kanban-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+.kanban-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
 }
 
-.create-btn {
-    background: #4f46e5;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
+.kanban-header h1{
+    font-size:22px;
 }
 
-.create-btn:hover {
-    background: #4338ca;
+.create-btn{
+    background:#4f46e5;
+    color:white;
+    border:none;
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.2s;
 }
 
-.kanban {
-    display: flex;
-    gap: 20px;
+.create-btn:hover{
+    background:#4338ca;
+}
+
+.kanban{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
 }
 
 </style>

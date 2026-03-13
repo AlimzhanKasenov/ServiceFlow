@@ -3,28 +3,24 @@
     <div class="stage">
 
         <div class="stage-header">
-
-            {{ stage.name }}
-
-            <span class="count">
-            {{ stage.requests?.length || 0 }}
-        </span>
-
+            <span class="stage-title">{{ stage.name }}</span>
+            <span class="count">{{ stage.requests?.length || 0 }}</span>
         </div>
 
         <draggable
             :list="stage.requests"
             group="requests"
             item-key="id"
-            @change="onMove"
+            class="stage-body"
+            @change="onChange"
+            ghost-class="ghost"
+            chosen-class="chosen"
+            drag-class="dragging"
+            animation="200"
         >
-
             <template #item="{ element }">
-
                 <RequestCard :request="element" />
-
             </template>
-
         </draggable>
 
     </div>
@@ -43,9 +39,10 @@ const props = defineProps({
 
 const store = useRequestStore()
 
-function onMove(evt){
+function onChange(evt) {
 
-    if(!evt.added) return
+    // интересует только когда элемент ДОБАВИЛСЯ в эту колонку
+    if (!evt.added) return
 
     const request = evt.added.element
 
@@ -59,22 +56,48 @@ function onMove(evt){
 
 .stage{
     width:320px;
-    background:#e9ecef;
-    border-radius:10px;
+    background:#f3f4f6;
+    border-radius:12px;
     padding:10px;
+    display:flex;
+    flex-direction:column;
 }
 
 .stage-header{
-    font-weight:600;
-    margin-bottom:10px;
     display:flex;
     justify-content:space-between;
+    align-items:center;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.stage-title{
+    font-size:15px;
 }
 
 .count{
-    background:#dee2e6;
+    background:#e5e7eb;
+    border-radius:12px;
     padding:2px 8px;
-    border-radius:10px;
+    font-size:12px;
+}
+
+.stage-body{
+    min-height:50px;
+}
+
+/* drag стили */
+
+.ghost{
+    opacity:0.4;
+}
+
+.chosen{
+    transform:scale(1.02);
+}
+
+.dragging{
+    transform:rotate(1deg);
 }
 
 </style>
