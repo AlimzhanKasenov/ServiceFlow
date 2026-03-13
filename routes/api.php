@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\StageController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\RequestController;
@@ -42,3 +43,5 @@ Route::post('/requests/{id}/comments', [RequestCommentController::class, 'store'
 | История действий заявки
 */
 Route::get('/requests/{id}/activities', [RequestActivityController::class, 'index']);
+
+Route::get('/pipelines/{pipeline}/stages', [StageController::class, 'byPipeline']);

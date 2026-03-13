@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ServiceRequest;
 use App\Models\RequestActivity;
+use App\Models\Stage;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -33,28 +34,39 @@ class RequestMoveController extends Controller
         }
 
         /**
-         * Пока в режиме разработки разрешаем любые переходы
-         * Ограничения через StageTransition вернём позже
+         * Получаем стадии
+         */
+        $fromStage = Stage::find($fromStageId);
+        $toStage = Stage::find($toStageId);
+
+        /**
+         * Меняем стадию заявки
          */
         $req->stage_id = $toStageId;
         $req->save();
 
         /**
-         * Пишем историю действий заявки
+         * Записываем историю действий
          */
-        RequestActivity::create([
+        $activity = RequestActivity::create([
             'request_id' => $req->id,
-            'user_id' => 1,
+            'user_id' => auth()->id() ?? 1, // пока fallback
             'type' => 'stage_changed',
             'data' => [
-                'from_stage' => $fromStageId,
-                'to_stage' => $toStageId
+                'from_stage' => $fromStage?->name,
+                'to_stage' => $toStage?->name
             ]
         ]);
 
+        /**
+         * Подгружаем пользователя для frontend
+         */
+        $activity->load('user');
+
         return response()->json([
             'success' => true,
-            'request' => $req->fresh()
+            'request' => $req->fresh(),
+            'activity' => $activity
         ]);
     }
 }
