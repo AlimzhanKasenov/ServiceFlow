@@ -37,6 +37,7 @@
         v-if="selectedRequest"
         :request="selectedRequest"
         @close="selectedRequest = null"
+        @stageChanged="onStageChanged"
     />
 
 </template>
@@ -69,6 +70,48 @@ onMounted(() => {
     store.loadPipeline()
 })
 
+function onStageChanged(data){
+
+    if(!pipeline.value) return
+
+    const stages = pipeline.value.stages
+
+    let movedRequest = null
+
+    // ищем карточку
+    for(const stage of stages){
+
+        const index = stage.requests.findIndex(
+            r => r.id === data.request_id
+        )
+
+        if(index !== -1){
+
+            movedRequest = stage.requests.splice(index,1)[0]
+
+            break
+
+        }
+
+    }
+
+    if(!movedRequest) return
+
+    // добавляем в новую колонку
+    const targetStage = stages.find(
+        s => s.id === data.stage_id
+    )
+
+    if(targetStage){
+
+        movedRequest.stage_id = data.stage_id
+
+        targetStage.requests.push(movedRequest)
+
+    }
+
+}
+
 /**
  * создание заявки
  */
@@ -81,6 +124,7 @@ function createRequest() {
     store.createRequest(title, 1)
 
 }
+
 
 /**
  * открытие карточки заявки
@@ -100,7 +144,6 @@ async function openRequest(id) {
         alert('Не удалось загрузить заявку')
 
     }
-
 }
 
 </script>
