@@ -4,7 +4,9 @@
 
         <div class="kanban-header">
 
-            <h1>ServiceFlow — система заявок</h1>
+            <h1 class="text-3xl font-bold text-blue-600">
+                ServiceFlow — система заявок
+            </h1>
 
             <button class="create-btn" @click="createRequest">
                 + Создать заявку
@@ -25,21 +27,22 @@
 
     </div>
 
-    <RequestModal
+    <RequestDetails
         v-if="selectedRequest"
         :request="selectedRequest"
-        @close="selectedRequest=null"
+        @close="selectedRequest = null"
     />
 
 </template>
 
+
 <script setup>
 
-import { computed, onMounted, ref } from 'vue'
-import { useRequestStore } from '../stores/requestStore'
+import {computed, onMounted, ref} from 'vue'
+import {useRequestStore} from '../stores/requestStore'
 import StageColumn from './StageColumn.vue'
 import requestApi from '../api/requestApi'
-import RequestModal from './RequestModal.vue'
+import RequestDetails from './RequestDetails.vue'
 
 const store = useRequestStore()
 
@@ -51,17 +54,17 @@ onMounted(() => {
     store.loadPipeline()
 })
 
-function createRequest(){
+function createRequest() {
 
     const title = prompt('Введите название заявки')
 
-    if(!title) return
+    if (!title) return
 
     store.createRequest(title, 1)
 
 }
 
-async function openRequest(id){
+async function openRequest(id) {
 
     selectedRequest.value = await requestApi.getRequest(id)
 
@@ -69,42 +72,43 @@ async function openRequest(id){
 
 </script>
 
+
 <style>
 
-body{
-    margin:0;
-    font-family:system-ui;
-    background:#eef1f5;
+body {
+    margin: 0;
+    font-family: system-ui;
+    background: #eef1f5;
 }
 
-.kanban-wrapper{
-    padding:25px;
+.kanban-wrapper {
+    padding: 25px;
 }
 
-.kanban-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
+.kanban-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-.kanban-header h1{
-    font-size:22px;
+.kanban-header h1 {
+    font-size: 22px;
 }
 
-.create-btn{
-    background:#4f46e5;
-    color:white;
-    border:none;
-    padding:10px 16px;
-    border-radius:8px;
-    cursor:pointer;
+.create-btn {
+    background: #4f46e5;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
-.kanban{
-    display:flex;
-    gap:20px;
-    align-items:flex-start;
+.kanban {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
 }
 
 </style>

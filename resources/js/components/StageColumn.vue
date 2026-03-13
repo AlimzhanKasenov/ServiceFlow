@@ -3,13 +3,14 @@
     <div class="stage">
 
         <div class="stage-header">
-            <span class="stage-title">
-                {{ stage.name }}
-            </span>
+
+        <span class="stage-title">
+            {{ stage.name }}
+        </span>
 
             <span class="count">
-                {{ stage.requests?.length || 0 }} шт
-            </span>
+            {{ stage.requests?.length || 0 }} шт
+        </span>
 
         </div>
 
@@ -27,10 +28,20 @@
 
             <template #item="{ element }">
 
-                <RequestCard
-                    :request="element"
-                    @open-request="$emit('open-request', $event)"
-                />
+                <div
+                    class="request-card"
+                    @click="$emit('open-request', element.id)"
+                >
+
+                    <div class="request-title">
+                        {{ element.title }}
+                    </div>
+
+                    <div class="request-id">
+                        #{{ element.id }}
+                    </div>
+
+                </div>
 
             </template>
 
@@ -43,8 +54,7 @@
 <script setup>
 
 import draggable from 'vuedraggable'
-import RequestCard from './RequestCard.vue'
-import {useRequestStore} from '../stores/requestStore'
+import { useRequestStore } from '../stores/requestStore'
 
 const props = defineProps({
     stage: Object
@@ -62,7 +72,10 @@ function onChange(evt) {
 
     const request = evt.added.element
 
-    store.moveRequest(request.id, props.stage.id)
+    store.moveRequest(
+        request.id,
+        props.stage.id
+    )
 
 }
 
@@ -100,6 +113,28 @@ function onChange(evt) {
 
 .stage-body {
     min-height: 50px;
+}
+
+.request-card {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.request-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.request-title {
+    font-weight: 500;
+}
+
+.request-id {
+    font-size: 12px;
+    color: #6b7280;
 }
 
 .ghost {

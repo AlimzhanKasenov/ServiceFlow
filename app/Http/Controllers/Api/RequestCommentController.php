@@ -8,10 +8,6 @@ use Illuminate\Http\Request;
 
 class RequestCommentController extends Controller
 {
-
-    /**
-     * Получить комментарии заявки
-     */
     public function index($requestId)
     {
         return RequestComment::with('user')
@@ -20,18 +16,20 @@ class RequestCommentController extends Controller
             ->get();
     }
 
-    /**
-     * Добавить комментарий
-     */
     public function store(Request $request, $requestId)
     {
-        $comment = RequestComment::create([
-            'request_id' => $requestId,
-            'user_id' => 1, // пока временно
-            'message' => $request->message
+        $request->validate([
+            'comment' => 'required|string'
         ]);
 
-        return $comment->load('user');
-    }
+        $comment = RequestComment::create([
+            'request_id' => $requestId,
+            'user_id' => 1,
+            'comment' => $request->comment
+        ]);
 
+        return response()->json(
+            $comment->load('user')
+        );
+    }
 }

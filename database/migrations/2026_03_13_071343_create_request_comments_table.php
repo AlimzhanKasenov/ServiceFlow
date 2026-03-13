@@ -19,7 +19,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->text('message');
+            $table->text('comment');
 
             $table->timestamps();
         });

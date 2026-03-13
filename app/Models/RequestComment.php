@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RequestComment extends Model
 {
+
     protected $fillable = [
         'request_id',
         'user_id',
-        'message'
+        'comment'
     ];
 
     public function request(): BelongsTo
@@ -22,4 +23,5 @@ class RequestComment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
 }
