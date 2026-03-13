@@ -85,4 +85,18 @@ class RequestController extends Controller
             'request' => $serviceRequest->fresh()
         ]);
     }
+
+    /**
+     * Получить одну заявку
+     */
+    public function show(int $id)
+    {
+        $request = ServiceRequest::with([
+            'stage',
+            'creator',
+            'assignee'
+        ])->findOrFail($id);
+
+        return response()->json($request);
+    }
 }

@@ -3,8 +3,14 @@
     <div class="stage">
 
         <div class="stage-header">
-            <span class="stage-title">{{ stage.name }}</span>
-            <span class="count">{{ stage.requests?.length || 0 }}</span>
+            <span class="stage-title">
+                {{ stage.name }}
+            </span>
+
+            <span class="count">
+                {{ stage.requests?.length || 0 }} шт
+            </span>
+
         </div>
 
         <draggable
@@ -18,9 +24,16 @@
             drag-class="dragging"
             animation="200"
         >
+
             <template #item="{ element }">
-                <RequestCard :request="element" />
+
+                <RequestCard
+                    :request="element"
+                    @open-request="$emit('open-request', $event)"
+                />
+
             </template>
+
         </draggable>
 
     </div>
@@ -31,17 +44,20 @@
 
 import draggable from 'vuedraggable'
 import RequestCard from './RequestCard.vue'
-import { useRequestStore } from '../stores/requestStore'
+import {useRequestStore} from '../stores/requestStore'
 
 const props = defineProps({
     stage: Object
 })
 
+defineEmits([
+    'open-request'
+])
+
 const store = useRequestStore()
 
 function onChange(evt) {
 
-    // интересует только когда элемент ДОБАВИЛСЯ в эту колонку
     if (!evt.added) return
 
     const request = evt.added.element
@@ -54,50 +70,48 @@ function onChange(evt) {
 
 <style>
 
-.stage{
-    width:320px;
-    background:#f3f4f6;
-    border-radius:12px;
-    padding:10px;
-    display:flex;
-    flex-direction:column;
+.stage {
+    width: 320px;
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
-.stage-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-weight:600;
-    margin-bottom:10px;
+.stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
-.stage-title{
-    font-size:15px;
+.stage-title {
+    font-size: 15px;
 }
 
-.count{
-    background:#e5e7eb;
-    border-radius:12px;
-    padding:2px 8px;
-    font-size:12px;
+.count {
+    background: #e5e7eb;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
 }
 
-.stage-body{
-    min-height:50px;
+.stage-body {
+    min-height: 50px;
 }
 
-/* drag стили */
-
-.ghost{
-    opacity:0.4;
+.ghost {
+    opacity: 0.4;
 }
 
-.chosen{
-    transform:scale(1.02);
+.chosen {
+    transform: scale(1.02);
 }
 
-.dragging{
-    transform:rotate(1deg);
+.dragging {
+    transform: rotate(1deg);
 }
 
 </style>

@@ -17,6 +17,11 @@ export default {
             title: title,
             stage_id: stageId
         })
+    },
+
+    async getRequest(id) {
+        const { data } = await axios.get(`/api/requests/${id}`)
+        return data
     }
 
 }

@@ -4,10 +4,10 @@
 
         <div class="kanban-header">
 
-            <h1>ServiceFlow</h1>
+            <h1>ServiceFlow — система заявок</h1>
 
             <button class="create-btn" @click="createRequest">
-                + Create Request
+                + Создать заявку
             </button>
 
         </div>
@@ -18,23 +18,34 @@
                 v-for="stage in pipeline.stages"
                 :key="stage.id"
                 :stage="stage"
+                @open-request="openRequest"
             />
 
         </div>
 
     </div>
 
+    <RequestModal
+        v-if="selectedRequest"
+        :request="selectedRequest"
+        @close="selectedRequest=null"
+    />
+
 </template>
 
 <script setup>
 
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRequestStore } from '../stores/requestStore'
 import StageColumn from './StageColumn.vue'
+import requestApi from '../api/requestApi'
+import RequestModal from './RequestModal.vue'
 
 const store = useRequestStore()
 
 const pipeline = computed(() => store.pipeline)
+
+const selectedRequest = ref(null)
 
 onMounted(() => {
     store.loadPipeline()
@@ -42,11 +53,17 @@ onMounted(() => {
 
 function createRequest(){
 
-    const title = prompt('Request title')
+    const title = prompt('Введите название заявки')
 
     if(!title) return
 
     store.createRequest(title, 1)
+
+}
+
+async function openRequest(id){
+
+    selectedRequest.value = await requestApi.getRequest(id)
 
 }
 
@@ -82,11 +99,6 @@ body{
     padding:10px 16px;
     border-radius:8px;
     cursor:pointer;
-    transition:.2s;
-}
-
-.create-btn:hover{
-    background:#4338ca;
 }
 
 .kanban{

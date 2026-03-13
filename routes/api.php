@@ -11,3 +11,4 @@ Route::get('/pipelines/{id}', [PipelineController::class, 'show']);
 Route::post('/requests/{serviceRequest}/move', [RequestController::class, 'move']);
 Route::get('/stages/{stage}/transitions', [TransitionController::class, 'index']);
 Route::post('/requests', [RequestController::class, 'store']);
+Route::get('/requests/{id}', [RequestController::class, 'show']);
