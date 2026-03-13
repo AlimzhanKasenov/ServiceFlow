@@ -14,6 +14,5 @@ use App\Http\Controllers\Api\PipelineController;
 
 Route::get('/requests', [RequestController::class, 'index']);
 Route::get('/pipelines/{id}', [PipelineController::class, 'show']);
-Route::post('/requests/{id}/move', [RequestController::class, 'move']);
-Route::post('/requests/{request}/move', [RequestMoveController::class, 'move']);
+Route::post('/requests/{serviceRequest}/move', [RequestController::class, 'move']);
 Route::get('/stages/{stage}/transitions', [TransitionController::class, 'index']);
