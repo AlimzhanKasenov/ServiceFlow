@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\RequestModel;
+use App\Models\ServiceRequest;
 use App\Models\StageTransition;
+use App\Models\RequestActivity;
 use Illuminate\Http\Request;
 
 class RequestMoveController extends Controller
@@ -12,7 +13,7 @@ class RequestMoveController extends Controller
     /**
      * Перемещение заявки между стадиями
      */
-    public function move(Request $request, RequestModel $req)
+    public function move(Request $request, ServiceRequest $req)
     {
         $validated = $request->validate([
             'to_stage_id' => 'required|exists:stages,id'
@@ -35,10 +36,23 @@ class RequestMoveController extends Controller
         }
 
         /**
-         * Перемещение
+         * Перемещение заявки
          */
         $req->stage_id = $toStage;
         $req->save();
+
+        /**
+         * Лог активности
+         */
+        RequestActivity::create([
+            'request_id' => $req->id,
+            'user_id' => auth()->id(),
+            'type' => 'stage_changed',
+            'data' => [
+                'from_stage' => $fromStage,
+                'to_stage' => $toStage
+            ]
+        ]);
 
         return response()->json([
             'success' => true

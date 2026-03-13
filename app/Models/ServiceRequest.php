@@ -36,6 +36,13 @@ class ServiceRequest extends Model
     ];
 
     /**
+     * Кастинг JSON
+     */
+    protected $casts = [
+        'data' => 'array'
+    ];
+
+    /**
      * Организация заявки
      */
     public function organization(): BelongsTo
@@ -83,9 +90,21 @@ class ServiceRequest extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    /**
+     * Комментарии заявки
+     */
     public function comments(): HasMany
     {
         return $this->hasMany(RequestComment::class, 'request_id')
+            ->latest();
+    }
+
+    /**
+     * История действий
+     */
+    public function activities(): HasMany
+    {
+        return $this->hasMany(RequestActivity::class, 'request_id')
             ->latest();
     }
 }
