@@ -33,13 +33,19 @@ class ServiceRequest extends Model
         'description',
         'priority',
         'data',
+        'sla_minutes',
+        'sla_started_at',
+        'sla_due_at',
+        'sla_breached',
     ];
 
     /**
      * Кастинг JSON
      */
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
+        'sla_started_at' => 'datetime',
+        'sla_due_at' => 'datetime',
     ];
 
     /**

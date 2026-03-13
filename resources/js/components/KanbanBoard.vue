@@ -14,6 +14,7 @@
 
         </div>
 
+        <!-- Канбан доска -->
         <div v-if="pipeline" class="kanban">
 
             <StageColumn
@@ -25,8 +26,13 @@
 
         </div>
 
+        <div v-else class="loading">
+            Загрузка канбана...
+        </div>
+
     </div>
 
+    <!-- Карточка заявки -->
     <RequestDetails
         v-if="selectedRequest"
         :request="selectedRequest"
@@ -38,22 +44,34 @@
 
 <script setup>
 
-import {computed, onMounted, ref} from 'vue'
-import {useRequestStore} from '../stores/requestStore'
+import { computed, onMounted, ref } from 'vue'
+import { useRequestStore } from '../stores/requestStore'
 import StageColumn from './StageColumn.vue'
 import requestApi from '../api/requestApi'
 import RequestDetails from './RequestDetails.vue'
 
 const store = useRequestStore()
 
+/**
+ * pipeline из store
+ */
 const pipeline = computed(() => store.pipeline)
 
+/**
+ * выбранная заявка
+ */
 const selectedRequest = ref(null)
 
+/**
+ * загрузка канбана
+ */
 onMounted(() => {
     store.loadPipeline()
 })
 
+/**
+ * создание заявки
+ */
 function createRequest() {
 
     const title = prompt('Введите название заявки')
@@ -64,9 +82,24 @@ function createRequest() {
 
 }
 
+/**
+ * открытие карточки заявки
+ */
 async function openRequest(id) {
 
-    selectedRequest.value = await requestApi.getRequest(id)
+    try {
+
+        const request = await requestApi.getRequest(id)
+
+        selectedRequest.value = request
+
+    } catch (error) {
+
+        console.error('Ошибка загрузки заявки', error)
+
+        alert('Не удалось загрузить заявку')
+
+    }
 
 }
 
@@ -105,10 +138,18 @@ body {
     cursor: pointer;
 }
 
+.create-btn:hover {
+    background: #4338ca;
+}
+
 .kanban {
     display: flex;
     gap: 20px;
     align-items: flex-start;
+}
+
+.loading {
+    color: #666;
 }
 
 </style>

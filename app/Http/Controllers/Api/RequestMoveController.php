@@ -4,58 +4,57 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ServiceRequest;
-use App\Models\StageTransition;
 use App\Models\RequestActivity;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class RequestMoveController extends Controller
 {
     /**
      * Перемещение заявки между стадиями
      */
-    public function move(Request $request, ServiceRequest $req)
+    public function move(Request $request, ServiceRequest $req): JsonResponse
     {
         $validated = $request->validate([
-            'to_stage_id' => 'required|exists:stages,id'
+            'stage_id' => ['required', 'exists:stages,id']
         ]);
 
-        $fromStage = $req->stage_id;
-        $toStage = $validated['to_stage_id'];
+        $fromStageId = $req->stage_id;
+        $toStageId = $validated['stage_id'];
 
         /**
-         * Проверяем допустимость перехода
+         * Если стадия не изменилась — просто возвращаем успех
          */
-        $allowed = StageTransition::where('from_stage_id', $fromStage)
-            ->where('to_stage_id', $toStage)
-            ->exists();
-
-        if (!$allowed) {
+        if ($fromStageId == $toStageId) {
             return response()->json([
-                'error' => 'Transition not allowed'
-            ], 403);
+                'success' => true,
+                'request' => $req
+            ]);
         }
 
         /**
-         * Перемещение заявки
+         * Пока в режиме разработки разрешаем любые переходы
+         * Ограничения через StageTransition вернём позже
          */
-        $req->stage_id = $toStage;
+        $req->stage_id = $toStageId;
         $req->save();
 
         /**
-         * Лог активности
+         * Пишем историю действий заявки
          */
         RequestActivity::create([
             'request_id' => $req->id,
-            'user_id' => auth()->id(),
+            'user_id' => 1,
             'type' => 'stage_changed',
             'data' => [
-                'from_stage' => $fromStage,
-                'to_stage' => $toStage
+                'from_stage' => $fromStageId,
+                'to_stage' => $toStageId
             ]
         ]);
 
         return response()->json([
-            'success' => true
+            'success' => true,
+            'request' => $req->fresh()
         ]);
     }
 }

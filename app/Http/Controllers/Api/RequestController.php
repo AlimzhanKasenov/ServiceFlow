@@ -8,6 +8,7 @@ use App\Models\ServiceRequest;
 use App\Models\StageTransition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class RequestController extends Controller
 {
@@ -16,7 +17,9 @@ class RequestController extends Controller
      */
     public function index(): JsonResponse
     {
-        return response()->json(ServiceRequest::with(['stage', 'pipeline'])->get());
+        return response()->json(
+            ServiceRequest::with(['stage', 'pipeline'])->get()
+        );
     }
 
     /**
@@ -29,6 +32,12 @@ class RequestController extends Controller
             'stage_id' => ['required', 'exists:stages,id'],
         ]);
 
+        /**
+         * SLA время заявки
+         * Пока делаем фиксированное значение — 2 часа
+         */
+        $slaMinutes = 120;
+
         $serviceRequest = ServiceRequest::create([
             'title' => $data['title'],
             'stage_id' => $data['stage_id'],
@@ -37,6 +46,14 @@ class RequestController extends Controller
             'request_type_id' => 1,
             'status' => 'open',
             'created_by' => 1,
+
+            /**
+             * SLA поля
+             */
+            'sla_minutes' => $slaMinutes,
+            'sla_started_at' => now(),
+            'sla_due_at' => now()->addMinutes($slaMinutes),
+            'sla_breached' => false
         ]);
 
         return response()->json([
@@ -59,7 +76,6 @@ class RequestController extends Controller
 
         /**
          * В режиме разработки разрешаем любые переходы
-         * (ограничения добавим позже через permissions)
          */
 
         if ($fromStageId == $toStageId) {
@@ -72,6 +88,9 @@ class RequestController extends Controller
         $serviceRequest->stage_id = $toStageId;
         $serviceRequest->save();
 
+        /**
+         * Логируем изменение стадии
+         */
         AuditLog::create([
             'request_id' => $serviceRequest->id,
             'action' => 'stage_changed',
