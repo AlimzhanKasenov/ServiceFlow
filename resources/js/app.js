@@ -1,12 +1,11 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
-import KanbanBoard from './components/KanbanBoard.vue';
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import KanbanBoard from './components/KanbanBoard.vue'
 
-console.log('Vue loaded')
-const app = createApp({});
+const app = createApp({})
 
-app.use(createPinia());
+app.use(createPinia())
 
-app.component('kanban-board', KanbanBoard);
+app.component('kanban-board', KanbanBoard)
 
-app.mount('#app');
+app.mount('#app')
