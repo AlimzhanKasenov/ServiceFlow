@@ -40,12 +40,13 @@ class ServiceRequest extends Model
     ];
 
     /**
-     * Кастинг JSON
+     * Кастинг полей
      */
     protected $casts = [
         'data' => 'array',
         'sla_started_at' => 'datetime',
         'sla_due_at' => 'datetime',
+        'sla_breached' => 'boolean',
     ];
 
     /**
@@ -89,7 +90,7 @@ class ServiceRequest extends Model
     }
 
     /**
-     * Исполнитель
+     * Исполнитель заявки
      */
     public function assignee(): BelongsTo
     {

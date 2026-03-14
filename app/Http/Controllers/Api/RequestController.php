@@ -121,4 +121,39 @@ class RequestController extends Controller
 
         return response()->json($request);
     }
+
+    /**
+     * Назначить исполнителя заявки
+     */
+    public function assign(Request $request, ServiceRequest $serviceRequest): JsonResponse
+    {
+        $data = $request->validate([
+            'user_id' => ['nullable', 'exists:users,id']
+        ]);
+
+        $oldAssignee = $serviceRequest->assigned_to;
+
+        /**
+         * Обновляем исполнителя
+         */
+        $serviceRequest->assigned_to = $data['user_id'] ?? null;
+        $serviceRequest->save();
+
+        /**
+         * Пишем в историю действий
+         */
+        $serviceRequest->activities()->create([
+            'user_id' => 1,
+            'type' => 'assignment',
+            'data' => [
+                'old_assignee_id' => $oldAssignee,
+                'new_assignee_id' => $data['user_id'] ?? null
+            ]
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'request' => $serviceRequest->fresh()
+        ]);
+    }
 }

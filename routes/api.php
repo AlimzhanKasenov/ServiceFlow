@@ -45,3 +45,4 @@ Route::post('/requests/{id}/comments', [RequestCommentController::class, 'store'
 Route::get('/requests/{id}/activities', [RequestActivityController::class, 'index']);
 
 Route::get('/pipelines/{pipeline}/stages', [StageController::class, 'byPipeline']);
+Route::post('/requests/{serviceRequest}/assign', [RequestController::class, 'assign']);
