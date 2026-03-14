@@ -119,16 +119,20 @@
                             class="comment"
                         >
 
-                            <div class="comment-author">
+                            <div class="comment-header">
 
-                                {{ comment.user?.name }}
+                                <div class="comment-author">
+                                    {{ comment.user?.name || 'Пользователь' }}
+                                </div>
+
+                                <div class="comment-date">
+                                    {{ formatDate(comment.created_at) }}
+                                </div>
 
                             </div>
 
                             <div class="comment-text">
-
                                 {{ comment.comment }}
-
                             </div>
 
                         </div>
@@ -136,7 +140,26 @@
                     </div>
 
 
-                    <!-- COMMENT FORM -->
+                    <!-- COMMENT INPUT -->
+
+                    <div class="comment-input">
+
+<textarea
+    v-model="commentText"
+    placeholder="Написать комментарий..."
+></textarea>
+
+                        <button
+                            class="add-comment"
+                            @click="sendComment"
+                        >
+                            Добавить комментарий
+                        </button>
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
 
                     <div class="actions">
 
@@ -144,40 +167,15 @@
                             class="save"
                             @click="saveRequest"
                         >
-
                             Сохранить
-
                         </button>
 
                         <button
                             class="cancel"
                             @click="$emit('close')"
                         >
-
                             Отмена
-
                         </button>
-
-                    </div>
-
-                    <div class="comment-input">
-
-                        <div class="comment-input">
-
-<textarea
-    v-model="commentText"
-    placeholder="Написать комментарий..."
-></textarea>
-
-                            <button
-                                class="add-comment"
-                                @click="sendComment"
-                            >
-                                Добавить комментарий
-                            </button>
-
-                        </div>
-
 
                     </div>
 
@@ -228,13 +226,6 @@
 
                         </div>
 
-
-                        <div v-else>
-
-                            {{ activity.type }}
-
-                        </div>
-
                     </div>
 
                 </div>
@@ -250,18 +241,17 @@
 
 <script setup>
 
-import {ref, onMounted} from "vue"
+import {ref,onMounted} from "vue"
 import axios from "axios"
 
 const props = defineProps({
-    request: Object
+    request:Object
 })
 
 const emit = defineEmits([
     'close',
     'stageChanged'
 ])
-
 
 const commentText = ref("")
 const comments = ref(props.request.comments || [])
@@ -271,17 +261,15 @@ const stages = ref([])
 
 const selectedStage = ref(props.request.stage_id)
 
+function formatDate(date){
 
-function formatDate(date) {
-
-    if (!date) return ""
+    if(!date) return ""
 
     return new Date(date).toLocaleString()
 
 }
 
-
-onMounted(async () => {
+onMounted(async ()=>{
 
     const res = await axios.get(
         `/api/pipelines/${props.request.pipeline_id}/stages`
@@ -292,47 +280,46 @@ onMounted(async () => {
 })
 
 
-async function changeStage() {
+async function changeStage(){
 
     const response = await axios.post(
         `/api/requests/${props.request.id}/move`,
         {
-            stage_id: selectedStage.value
+            stage_id:selectedStage.value
         }
     )
 
-    if (response.data.activity) {
+    if(response.data.activity){
+
         activities.value.unshift(response.data.activity)
+
     }
 
-    /**
-     * сообщаем KanbanBoard что стадия изменилась
-     */
-    emit('stageChanged', {
-        request_id: props.request.id,
-        stage_id: selectedStage.value
+    emit('stageChanged',{
+        request_id:props.request.id,
+        stage_id:selectedStage.value
     })
 
 }
 
 
-async function sendComment() {
+async function sendComment(){
 
-    if (!commentText.value.trim()) return
+    if(!commentText.value.trim()) return
 
     const response = await axios.post(
         `/api/requests/${props.request.id}/comments`,
-
         {
             comment: commentText.value
         }
     )
 
-    comments.value.push(response.data)
+    comments.value.unshift(response.data)
 
-    commentText.value = ""
+    commentText.value=""
 
 }
+
 
 async function saveRequest(){
 
@@ -340,7 +327,7 @@ async function saveRequest(){
 
         `/api/requests/${props.request.id}`,
 
-        form.value
+        {}
 
     )
 
@@ -352,30 +339,177 @@ async function saveRequest(){
 
 
 <style scoped>
-.comment-input{
-    margin-top:15px;
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.35);
     display:flex;
-    gap:10px;
+    justify-content:center;
+    align-items:center;
+}
+
+.card{
+    width:900px;
+    max-height:90vh;
+    overflow:auto;
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
     align-items:flex-start;
 }
 
-.comment-input textarea{
+.request-id{
+    color:#888;
+    font-size:13px;
+}
+
+.close{
+    border:none;
+    background:none;
+    font-size:20px;
+    cursor:pointer;
+}
+
+/* LAYOUT */
+
+.content{
+    display:flex;
+    gap:30px;
+    margin-top:25px;
+    align-items:flex-start;
+}
+
+.left{
     flex:1;
 }
 
+.right{
+    width:320px;
+    min-width:320px;
+    background:#f8fafc;
+    padding:15px;
+    border-radius:8px;
+    max-height:500px;
+    overflow-y:auto;
+}
+
+/* META */
+
+.meta-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.meta-item label{
+    font-size:12px;
+    color:#777;
+    display:block;
+    margin-bottom:4px;
+}
+
+.stage-select{
+    width:100%;
+    padding:6px 10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+.badge{
+    display:inline-block;
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:13px;
+}
+
+.priority{
+    background:#fff3cd;
+}
+
+.value{
+    background:#f5f6f7;
+    padding:8px 12px;
+    border-radius:6px;
+}
+
+/* COMMENTS */
+
+.comments{
+    margin-top:30px;
+}
+
+.comment{
+    background:#f6f7fb;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+
+.comment-header{
+    display:flex;
+    justify-content:space-between;
+}
+
+.comment-author{
+    font-weight:600;
+    font-size:14px;
+}
+
+.comment-date{
+    font-size:12px;
+    color:#888;
+}
+
+.comment-text{
+    margin-top:4px;
+}
+
+/* COMMENT INPUT */
+
+.comment-input{
+    margin-top:20px;
+    display:flex;
+    flex-direction:column;
+}
+
+.comment-input textarea{
+    width:100%;
+    min-height:120px;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #d1d5db;
+    resize:vertical;
+}
+
 .add-comment{
-    background:#4f46e5;
-    color:white;
+    margin-top:8px;
+    align-self:flex-start;
+    background:#e5e7eb;
+    color:#374151;
     border:none;
-    padding:8px 14px;
+    padding:6px 12px;
     border-radius:6px;
     cursor:pointer;
+    font-size:13px;
 }
+
+.add-comment:hover{
+    background:#d1d5db;
+}
+
+/* ACTIONS */
 
 .actions{
     display:flex;
     gap:10px;
-    margin-top:20px;
+    margin-top:30px;
 }
 
 .save{
@@ -395,194 +529,23 @@ async function saveRequest(){
     cursor:pointer;
 }
 
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-
-.card {
-    width: 900px;
-    max-height: 90vh;
-    overflow: auto;
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-}
-
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-
-.request-id {
-    color: #888;
-    font-size: 13px;
-}
-
-
-.close {
-    border: none;
-    background: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-
-/* LAYOUT */
-
-.content {
-    display: flex;
-    gap: 30px;
-    margin-top: 25px;
-}
-
-
-.left {
-    flex: 2;
-}
-
-
-.right {
-    flex: 1;
-    background: #f8fafc;
-    padding: 15px;
-    border-radius: 8px;
-    max-height: 500px;
-    overflow: auto;
-}
-
-
-/* META */
-
-.meta-grid {
-    display: grid;
-    grid-template-columns:1fr 1fr;
-    gap: 20px;
-}
-
-
-.meta-item label {
-    font-size: 12px;
-    color: #777;
-    display: block;
-    margin-bottom: 4px;
-}
-
-
-.stage-select {
-    width: 100%;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-
-.badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-}
-
-
-.stage {
-    background: #e3f2fd;
-}
-
-
-.priority {
-    background: #fff3cd;
-}
-
-
-.value {
-    background: #f5f6f7;
-    padding: 8px 12px;
-    border-radius: 6px;
-}
-
-
-/* COMMENTS */
-
-.comments {
-    margin-top: 30px;
-}
-
-
-.comment {
-    background: #f6f7fb;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
-
-
-.comment-author {
-    font-weight: 600;
-    font-size: 14px;
-}
-
-
-.comment-text {
-    margin-top: 4px;
-}
-
-
 /* HISTORY */
 
-.history-item {
-    background: #eef2ff;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 8px;
+.history-item{
+    background:#eef2ff;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:8px;
 }
 
-
-.time {
-    margin-top: 4px;
-    font-size: 12px;
-    color: #666;
+.time{
+    margin-top:4px;
+    font-size:12px;
+    color:#666;
 }
 
-
-/* COMMENT FORM */
-
-.comment-form {
-    margin-top: 20px;
-}
-
-
-.comment-form textarea {
-    width: 100%;
-    min-height: 80px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
-
-
-.send {
-    margin-top: 10px;
-    background: #4f46e5;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-
-.empty {
-    color: #888;
+.empty{
+    color:#888;
 }
 
 </style>
