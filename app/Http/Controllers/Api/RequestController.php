@@ -142,15 +142,15 @@ class RequestController extends Controller
         $serviceRequest->assigned_to = $data['user_id'] ?? null;
         $serviceRequest->save();
 
-        /**
-         * Пишем в историю действий
-         */
+        $oldUser = $oldAssignee ? \App\Models\User::find($oldAssignee) : null;
+        $newUser = $data['user_id'] ? \App\Models\User::find($data['user_id']) : null;
+
         $activity = $serviceRequest->activities()->create([
             'user_id' => 1,
             'type' => 'assignment',
             'data' => [
-                'old_assignee_id' => $oldAssignee,
-                'new_assignee_id' => $data['user_id'] ?? null
+                'old_assignee' => $oldUser?->name,
+                'new_assignee' => $newUser?->name
             ]
         ]);
 
@@ -159,5 +159,20 @@ class RequestController extends Controller
             'request' => $serviceRequest->fresh(),
             'activity' => $activity->load('user')
         ]);
+    }
+
+    /**
+     * Обновление заявки
+     */
+    public function update(Request $request, ServiceRequest $serviceRequest)
+    {
+        $data = $request->validate([
+            'title' => ['nullable', 'string', 'max:255'],
+            'priority' => ['nullable', 'string']
+        ]);
+
+        $serviceRequest->update($data);
+
+        return response()->json($serviceRequest->fresh());
     }
 }

@@ -2,20 +2,38 @@
 
     <div class="modal">
 
-        <div class="card">
+        <div
+            class="card"
+            :class="'priority-card-' + (editablePriority || 'normal')"
+        >
 
             <!-- HEADER -->
 
             <div class="header">
 
-                <div>
+                <div class="title-row">
 
-                    <h2>{{ request.title }}</h2>
-                    <div class="request-id">#{{ request.id }}</div>
+                    <input
+                        v-model="editableTitle"
+                        class="title-input"
+                        placeholder="Название заявки"
+                    />
+
+                    <span
+                        class="priority-badge"
+                        :class="'badge-' + editablePriority"
+                    >
+                        {{ editablePriority }}
+                    </span>
+
+                    <div class="request-id">ID:{{ request.id }}</div>
 
                 </div>
 
-                <button class="close" @click="$emit('close')">
+                <button
+                    class="close"
+                    @click="closeWithoutSave"
+                >
                     ✕
                 </button>
 
@@ -63,9 +81,17 @@
 
                             <label>Приоритет</label>
 
-                            <div class="badge priority">
+                            <div class="priority-row">
 
-                                {{ request.priority }}
+                                <select
+                                    v-model="editablePriority"
+                                    class="stage-select"
+                                >
+                                    <option value="low">low</option>
+                                    <option value="normal">normal</option>
+                                    <option value="high">high</option>
+                                    <option value="critical">critical</option>
+                                </select>
 
                             </div>
 
@@ -126,7 +152,7 @@
 
 
                         <div
-                            v-for="comment in comments"
+                            v-for="comment in visibleComments"
                             :key="comment.id"
                             class="comment"
                         >
@@ -151,6 +177,24 @@
 
                     </div>
 
+                    <div v-if="comments.length > 5" class="comments-toggle">
+
+                        <button
+                            v-if="!showAllComments"
+                            @click="showAllComments = true"
+                        >
+                            Показать все комментарии
+                        </button>
+
+                        <button
+                            v-else
+                            @click="showAllComments = false"
+                        >
+                            Скрыть
+                        </button>
+
+                    </div>
+
 
                     <!-- COMMENT INPUT -->
 
@@ -171,11 +215,10 @@
                     </div>
 
 
-                    <!-- ACTIONS -->
-
                     <div class="actions">
 
                         <button
+                            v-if="hasChanges"
                             class="save"
                             @click="saveRequest"
                         >
@@ -186,7 +229,7 @@
                             class="cancel"
                             @click="$emit('close')"
                         >
-                            Отмена
+                            Закрыть
                         </button>
 
                     </div>
@@ -238,6 +281,21 @@
 
                         </div>
 
+                        <div v-if="activity.type === 'assignment'">
+
+                            <b>{{ activity.user?.name }}</b>
+                            назначил ответственным
+
+                            <br>
+
+                            {{ activity.data.new_assignee }}
+
+                            <div class="time">
+                                {{ formatDate(activity.created_at) }}
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>
@@ -253,8 +311,19 @@
 
 <script setup>
 
-import {ref,onMounted} from "vue"
+import { ref, onMounted, computed } from "vue"
 import axios from "axios"
+
+const hasChanges = computed(() => {
+
+    return (
+        editableTitle.value !== initialTitle ||
+        editablePriority.value !== initialPriority ||
+        selectedStage.value !== initialStage ||
+        selectedAssignee.value !== initialAssignee
+    )
+
+})
 
 const props = defineProps({
     request:Object
@@ -265,10 +334,18 @@ const selectedAssignee = ref(props.request.assigned_to || null)
 
 const emit = defineEmits([
     'close',
-    'stageChanged'
+    'stageChanged',
+    'updated'
 ])
 
 const commentText = ref("")
+
+const editableTitle = ref(props.request.title || "")
+const editablePriority = ref(props.request.priority || "normal")
+const initialTitle = props.request.title
+const initialPriority = props.request.priority
+const initialStage = props.request.stage_id
+const initialAssignee = props.request.assigned_to
 
 const stages = ref([])
 
@@ -277,16 +354,25 @@ const selectedStage = ref(props.request.stage_id)
 const comments = ref(props.request.comments || [])
 const activities = ref(props.request.activities || [])
 
-function formatDate(date){
+const showAllComments = ref(false)
 
+const visibleComments = computed(() => {
+
+    if (showAllComments.value) {
+        return comments.value
+    }
+
+    return comments.value.slice(0, 5)
+
+})
+
+function formatDate(date){
     if(!date) return ""
 
     return new Date(date).toLocaleString()
-
 }
 
 onMounted(async ()=>{
-
     const res = await axios.get(
         `/api/pipelines/${props.request.pipeline_id}/stages`
     )
@@ -295,55 +381,9 @@ onMounted(async ()=>{
 
     const usersRes = await axios.get('/api/users')
     users.value = usersRes.data
-
 })
 
-
-async function changeStage(){
-
-    const response = await axios.post(
-        `/api/requests/${props.request.id}/move`,
-        {
-            stage_id:selectedStage.value
-        }
-    )
-
-    if(response.data.activity){
-
-        activities.value.unshift(response.data.activity)
-
-    }
-
-    emit('stageChanged',{
-        request_id:props.request.id,
-        stage_id:selectedStage.value
-    })
-
-}
-
-
-async function changeAssignee(){
-
-    const response = await axios.post(
-        `/api/requests/${props.request.id}/assign`,
-        {
-            user_id: selectedAssignee.value
-        }
-    )
-
-    Object.assign(props.request, response.data.request)
-
-    if(response.data.activity){
-
-        activities.value.unshift(response.data.activity)
-
-    }
-
-}
-
-
 async function sendComment(){
-
     if(!commentText.value.trim()) return
 
     const response = await axios.post(
@@ -354,30 +394,158 @@ async function sendComment(){
     )
 
     comments.value.unshift(response.data)
-
     commentText.value=""
-
 }
 
+function closeWithoutSave(){
+    emit('close')
+}
 
 async function saveRequest(){
 
-    const response = await axios.patch(
+    try{
 
-        `/api/requests/${props.request.id}`,
+        // обновляем основные поля
+        const response = await axios.patch(
+            `/api/requests/${props.request.id}`,
+            {
+                title: editableTitle.value,
+                priority: editablePriority.value
+            }
+        )
 
-        {}
+        Object.assign(props.request, response.data)
 
-    )
+        // если поменяли этап
+        if(selectedStage.value !== props.request.stage_id){
 
-    Object.assign(props.request,response.data)
+            await axios.post(
+                `/api/requests/${props.request.id}/move`,
+                {
+                    stage_id:selectedStage.value
+                }
+            )
+
+        }
+
+        // если поменяли исполнителя
+        if(selectedAssignee.value !== props.request.assigned_to){
+
+            await axios.post(
+                `/api/requests/${props.request.id}/assign`,
+                {
+                    user_id:selectedAssignee.value
+                }
+            )
+
+        }
+
+        emit('updated')
+        emit('close')
+
+    }catch(e){
+
+        console.error(e)
+        alert("Ошибка сохранения")
+
+    }
 
 }
-
 </script>
 
 
 <style scoped>
+/* Полоса приоритета слева */
+.priority-card-low{
+    border-left:6px solid #9ca3af;
+}
+
+.priority-card-normal{
+    border-left:6px solid #3b82f6;
+}
+
+.priority-card-high{
+    border-left:6px solid #f59e0b;
+}
+
+.priority-card-critical{
+    border-left:6px solid #ef4444;
+}
+
+.priority-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.priority-badge{
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+}
+
+.comments-toggle{
+    margin-top:10px;
+}
+
+.comments-toggle button{
+    background:#e5e7eb;
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.title-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.priority-badge{
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    text-transform:uppercase;
+}
+
+.badge-low{
+    background:#f3f4f6;
+    color:#374151;
+}
+
+.badge-normal{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.badge-high{
+    background:#fde68a;
+    color:#92400e;
+}
+
+.badge-critical{
+    background:#fecaca;
+    color:#7f1d1d;
+}
+
+.title-input{
+    width:100%;
+    font-size:24px;
+    font-weight:700;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    padding:8px 12px;
+    outline:none;
+}
+
+.title-input:focus{
+    border-color:#4f46e5;
+}
 
 .modal{
     position:fixed;
@@ -391,11 +559,11 @@ async function saveRequest(){
 .card{
     width:900px;
     max-height:90vh;
-    overflow:auto;
     background:white;
     border-radius:10px;
     padding:25px;
     box-shadow:0 20px 60px rgba(0,0,0,0.2);
+    overflow-y:auto;
 }
 
 .header{
@@ -422,11 +590,13 @@ async function saveRequest(){
     display:flex;
     gap:30px;
     margin-top:25px;
-    align-items:flex-start;
+    align-items:stretch;
 }
 
 .left{
     flex:1;
+    overflow-y:auto;
+    padding-right:5px;
 }
 
 .right{
@@ -435,7 +605,7 @@ async function saveRequest(){
     background:#f8fafc;
     padding:15px;
     border-radius:8px;
-    max-height:500px;
+    max-height:600px;
     overflow-y:auto;
 }
 

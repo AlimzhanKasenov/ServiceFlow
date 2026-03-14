@@ -30,6 +30,7 @@
 
                 <div
                     class="request-card"
+                    :class="'priority-' + (element.priority || 'normal')"
                     @click="$emit('open-request', element.id)"
                 >
 
@@ -38,7 +39,7 @@
                     </div>
 
                     <div class="request-id">
-                        #{{ element.id }}
+                        ID:{{ element.id }}
                     </div>
 
                 </div>
@@ -82,6 +83,29 @@ function onChange(evt) {
 </script>
 
 <style>
+/* LOW */
+.priority-low{
+    border-left: 5px solid #9ca3af;
+    background: #f9fafb;
+}
+
+/* NORMAL */
+.priority-normal{
+    border-left: 5px solid #3b82f6;
+    background: #eff6ff;
+}
+
+/* HIGH */
+.priority-high{
+    border-left: 5px solid #f59e0b;
+    background: #fffbeb;
+}
+
+/* CRITICAL */
+.priority-critical{
+    border-left: 5px solid #ef4444;
+    background: #fef2f2;
+}
 
 .stage {
     width: 320px;

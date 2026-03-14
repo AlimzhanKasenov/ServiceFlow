@@ -38,6 +38,7 @@
         :request="selectedRequest"
         @close="selectedRequest = null"
         @stageChanged="onStageChanged"
+        @updated="reloadKanban"
     />
 
 </template>
@@ -69,6 +70,10 @@ const selectedRequest = ref(null)
 onMounted(() => {
     store.loadPipeline()
 })
+
+function reloadKanban(){
+    store.loadPipeline()
+}
 
 function onStageChanged(data){
 

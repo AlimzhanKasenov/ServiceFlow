@@ -16,90 +16,67 @@ use App\Http\Controllers\Api\TransitionController;
 |--------------------------------------------------------------------------
 | ServiceFlow API
 |--------------------------------------------------------------------------
-|
-| Основные REST API системы ServiceFlow
-|
 */
-
 
 /*
-|--------------------------------------------------------------------------
 | REQUESTS
-|--------------------------------------------------------------------------
 */
-
 Route::prefix('requests')->group(function () {
 
-    /*
-    | Список заявок
-    */
+    // список заявок
     Route::get('/', [RequestController::class, 'index']);
 
-    /*
-    | Создание заявки
-    */
+    // создание заявки
     Route::post('/', [RequestController::class, 'store']);
 
-    /*
-    | Просмотр заявки
-    */
+    // просмотр заявки
     Route::get('/{id}', [RequestController::class, 'show']);
 
-
-    /*
-    | Назначение исполнителя
-    */
+    // назначение исполнителя
     Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign']);
 
-
-    /*
-    | Перемещение заявки по стадиям
-    */
+    // перемещение стадии
     Route::post('/{req}/move', [RequestMoveController::class, 'move']);
 
-
-    /*
-    | Комментарии заявки
-    */
+    // комментарии
     Route::get('/{id}/comments', [RequestCommentController::class, 'index']);
     Route::post('/{id}/comments', [RequestCommentController::class, 'store']);
 
-
-    /*
-    | История действий заявки
-    */
+    // история действий
     Route::get('/{id}/activities', [RequestActivityController::class, 'index']);
+
+    // обновление заявки
+    Route::patch('/{serviceRequest}', [RequestController::class, 'update']);
 
 });
 
-
 /*
-|--------------------------------------------------------------------------
 | PIPELINES
-|--------------------------------------------------------------------------
 */
-
 Route::prefix('pipelines')->group(function () {
 
-    /*
-    | Получить pipeline
-    */
+    // получить pipeline
     Route::get('/{id}', [PipelineController::class, 'show']);
 
-    /*
-    | Стадии pipeline
-    */
+    // стадии pipeline
     Route::get('/{pipeline}/stages', [StageController::class, 'byPipeline']);
 
 });
 
+
+/*
+| STAGES
+*/
 Route::prefix('stages')->group(function () {
 
-    /*
-    | Доступные переходы стадий
-    */
+    // доступные переходы стадий
     Route::get('/{stage}/transitions', [TransitionController::class, 'index']);
 
 });
 
+
+/*
+| USERS
+*/
 Route::get('/users', [UserController::class, 'index']);
+
