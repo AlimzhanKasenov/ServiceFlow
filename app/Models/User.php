@@ -92,4 +92,20 @@ class User extends Authenticatable
             })
             ->exists();
     }
+
+    /**
+     * Проверка любого разрешения
+     */
+    public function hasAnyPermission(array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+
+        }
+
+        return false;
+    }
 }

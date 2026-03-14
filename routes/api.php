@@ -24,29 +24,39 @@ use App\Http\Controllers\Api\TransitionController;
 Route::prefix('requests')->group(function () {
 
     // список заявок
-    Route::get('/', [RequestController::class, 'index']);
+    Route::get('/', [RequestController::class, 'index'])
+        ->middleware('permission:request.view');
 
     // создание заявки
-    Route::post('/', [RequestController::class, 'store']);
+    Route::post('/', [RequestController::class, 'store'])
+        ->middleware('permission:request.create');
 
     // просмотр заявки
-    Route::get('/{id}', [RequestController::class, 'show']);
+    Route::get('/{id}', [RequestController::class, 'show'])
+        ->middleware('permission:request.view');
 
     // назначение исполнителя
-    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign']);
+    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign'])
+        ->middleware('permission:request.assign');
 
     // перемещение стадии
-    Route::post('/{req}/move', [RequestMoveController::class, 'move']);
+    Route::post('/{req}/move', [RequestMoveController::class, 'move'])
+        ->middleware('permission:request.move');
 
     // комментарии
-    Route::get('/{id}/comments', [RequestCommentController::class, 'index']);
-    Route::post('/{id}/comments', [RequestCommentController::class, 'store']);
+    Route::get('/{id}/comments', [RequestCommentController::class, 'index'])
+        ->middleware('permission:request.view');
+
+    Route::post('/{id}/comments', [RequestCommentController::class, 'store'])
+        ->middleware('permission:request.comment');
 
     // история действий
-    Route::get('/{id}/activities', [RequestActivityController::class, 'index']);
+    Route::get('/{id}/activities', [RequestActivityController::class, 'index'])
+        ->middleware('permission:request.view');
 
     // обновление заявки
-    Route::patch('/{serviceRequest}', [RequestController::class, 'update']);
+    Route::patch('/{serviceRequest}', [RequestController::class, 'update'])
+        ->middleware('permission:request.move');
 
 });
 
