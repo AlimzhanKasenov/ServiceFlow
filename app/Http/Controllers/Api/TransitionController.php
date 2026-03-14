@@ -9,23 +9,23 @@ use Illuminate\Http\JsonResponse;
 /**
  * Class TransitionController
  *
- * API для получения доступных переходов между стадиями.
+ * Возвращает доступные переходы из текущей стадии.
  */
 class TransitionController extends Controller
 {
     /**
-     * Получить переходы из стадии
-     *
-     * GET /api/stages/{stage}/transitions
+     * Получить доступные переходы
      */
     public function index(Stage $stage): JsonResponse
     {
-        $transitions = $stage
-            ->outgoingTransitions()
-            ->with(['toStage', 'conditions'])
+        $transitions = $stage->outgoingTransitions()
+            ->with('toStage')
             ->orderBy('position')
             ->get();
 
-        return response()->json($transitions);
+        return response()->json([
+            'success' => true,
+            'transitions' => $transitions
+        ]);
     }
 }
