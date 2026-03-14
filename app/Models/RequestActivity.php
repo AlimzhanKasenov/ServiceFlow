@@ -8,58 +8,40 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class RequestActivity
  *
- * История действий по заявке.
- *
- * Используется для построения таймлайна заявки:
- *
- * - заявка создана
- * - смена стадии
- * - назначение исполнителя
- * - изменение приоритета
- * - добавление комментария
- *
- * Таблица: request_activities
- *
- * @property int $id
- * @property int $request_id
- * @property int|null $user_id
- * @property string $type
- * @property array|null $data
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
+ * Лог действий по заявке.
  */
 class RequestActivity extends Model
 {
     /**
-     * Массово заполняемые поля
+     * Mass assignable
      */
     protected $fillable = [
         'request_id',
         'user_id',
         'type',
-        'data'
+        'data',
     ];
 
     /**
-     * Приведение типов
+     * Casts
      */
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
     ];
 
     /**
-     * Связь с заявкой
+     * Заявка
      */
     public function request(): BelongsTo
     {
-        return $this->belongsTo(Request::class);
+        return $this->belongsTo(ServiceRequest::class, 'request_id');
     }
 
     /**
      * Пользователь
      */
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class);
     }
 }
