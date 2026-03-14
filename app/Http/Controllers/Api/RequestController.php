@@ -125,6 +125,9 @@ class RequestController extends Controller
     /**
      * Назначить исполнителя заявки
      */
+    /**
+     * Назначить исполнителя заявки
+     */
     public function assign(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
         $data = $request->validate([
@@ -142,7 +145,7 @@ class RequestController extends Controller
         /**
          * Пишем в историю действий
          */
-        $serviceRequest->activities()->create([
+        $activity = $serviceRequest->activities()->create([
             'user_id' => 1,
             'type' => 'assignment',
             'data' => [
@@ -153,7 +156,8 @@ class RequestController extends Controller
 
         return response()->json([
             'success' => true,
-            'request' => $serviceRequest->fresh()
+            'request' => $serviceRequest->fresh(),
+            'activity' => $activity->load('user')
         ]);
     }
 }

@@ -76,11 +76,23 @@
 
                             <label>Исполнитель</label>
 
-                            <div class="value">
+                            <select
+                                v-model="selectedAssignee"
+                                @change="changeAssignee"
+                                class="stage-select"
+                            >
 
-                                {{ request.assigned_user?.name || "не назначен" }}
+                                <option :value="null">не назначен</option>
 
-                            </div>
+                                <option
+                                    v-for="user in users"
+                                    :key="user.id"
+                                    :value="user.id"
+                                >
+                                    {{ user.name }}
+                                </option>
+
+                            </select>
 
                         </div>
 
@@ -248,18 +260,22 @@ const props = defineProps({
     request:Object
 })
 
+const users = ref([])
+const selectedAssignee = ref(props.request.assigned_to || null)
+
 const emit = defineEmits([
     'close',
     'stageChanged'
 ])
 
 const commentText = ref("")
-const comments = ref(props.request.comments || [])
-const activities = ref(props.request.activities || [])
 
 const stages = ref([])
 
 const selectedStage = ref(props.request.stage_id)
+
+const comments = ref(props.request.comments || [])
+const activities = ref(props.request.activities || [])
 
 function formatDate(date){
 
@@ -276,6 +292,9 @@ onMounted(async ()=>{
     )
 
     stages.value = res.data
+
+    const usersRes = await axios.get('/api/users')
+    users.value = usersRes.data
 
 })
 
@@ -299,6 +318,26 @@ async function changeStage(){
         request_id:props.request.id,
         stage_id:selectedStage.value
     })
+
+}
+
+
+async function changeAssignee(){
+
+    const response = await axios.post(
+        `/api/requests/${props.request.id}/assign`,
+        {
+            user_id: selectedAssignee.value
+        }
+    )
+
+    Object.assign(props.request, response.data.request)
+
+    if(response.data.activity){
+
+        activities.value.unshift(response.data.activity)
+
+    }
 
 }
 
