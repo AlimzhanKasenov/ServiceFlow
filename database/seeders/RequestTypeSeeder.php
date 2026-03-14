@@ -10,12 +10,19 @@ class RequestTypeSeeder extends Seeder
     public function run(): void
     {
 
-        RequestType::create([
-            'organization_id' => 1,
-            'name' => 'Общие заявки',
-            'description' => 'Основной тип заявок системы',
-            'icon' => 'ticket'
-        ]);
+        RequestType::updateOrCreate(
+
+            [
+                'organization_id' => 1,
+                'name' => 'Общие заявки'
+            ],
+
+            [
+                'description' => 'Основной тип заявок системы',
+                'icon' => 'ticket'
+            ]
+
+        );
 
     }
 }

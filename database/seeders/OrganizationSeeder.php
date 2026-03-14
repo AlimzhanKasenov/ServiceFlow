@@ -7,15 +7,20 @@ use App\Models\Organization;
 
 class OrganizationSeeder extends Seeder
 {
-
     public function run(): void
     {
 
-        Organization::create([
-            'name' => 'Основная организация',
-            'slug' => 'main'
-        ]);
+        Organization::updateOrCreate(
+
+            [
+                'slug' => 'main'
+            ],
+
+            [
+                'name' => 'Основная организация'
+            ]
+
+        );
 
     }
-
 }
