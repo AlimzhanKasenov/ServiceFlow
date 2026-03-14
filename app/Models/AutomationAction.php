@@ -8,17 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class AutomationAction
  *
- * Действие правила автоматизации.
- *
- * Примеры действий:
- *
- * send_email
- * create_task
- * webhook
- *
- * config хранится в JSON.
- *
- * Таблица: automation_actions
+ * Действие автоматизации.
  */
 class AutomationAction extends Model
 {
@@ -35,9 +25,6 @@ class AutomationAction extends Model
         'config' => 'array'
     ];
 
-    /**
-     * Rule
-     */
     public function rule(): BelongsTo
     {
         return $this->belongsTo(AutomationRule::class);

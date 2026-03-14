@@ -2,60 +2,75 @@
 
 namespace App\Services\Automation;
 
-use App\Models\AutomationRule;
-use App\Models\Request;
+use App\Models\ServiceRequest;
+use App\Models\AutomationAction;
+use App\Models\RequestActivity;
 
 /**
  * Class AutomationService
  *
- * Выполняет правила автоматизации workflow.
+ * Выполняет действия автоматизации.
  */
 class AutomationService
 {
-    /**
-     * Выполнить автоматизацию
-     */
-    public function handle(string $event, Request $request): void
+    public function execute(AutomationAction $action, ServiceRequest $request): void
     {
-        $rules = AutomationRule::query()
-            ->where('event', $event)
-            ->where('pipeline_id', $request->pipeline_id)
-            ->where('active', true)
-            ->get();
+        match ($action->type) {
 
-        foreach ($rules as $rule) {
+            'assign_user' => $this->assignUser($action, $request),
 
-            foreach ($rule->actions as $action) {
+            'add_comment' => $this->addComment($action, $request),
 
-                $this->executeAction($action->type, $action->config, $request);
-            }
-        }
+            'set_priority' => $this->setPriority($action, $request),
+
+            default => null
+        };
     }
 
     /**
-     * Выполнение действия
+     * Назначить пользователя
      */
-    protected function executeAction(string $type, array $config, Request $request): void
+    protected function assignUser(AutomationAction $action, ServiceRequest $request): void
     {
-        switch ($type) {
+        $userId = $action->config['user_id'] ?? null;
 
-            case 'send_email':
-
-                // отправка email
-
-                break;
-
-            case 'create_task':
-
-                // создание задачи
-
-                break;
-
-            case 'webhook':
-
-                // webhook
-
-                break;
+        if (!$userId) {
+            return;
         }
+
+        $request->update([
+            'assigned_to' => $userId
+        ]);
+    }
+
+    /**
+     * Добавить комментарий
+     */
+    protected function addComment(AutomationAction $action, ServiceRequest $request): void
+    {
+        RequestActivity::create([
+            'request_id' => $request->id,
+            'user_id' => 1,
+            'type' => 'automation_comment',
+            'data' => [
+                'message' => $action->config['message'] ?? 'Automation message'
+            ]
+        ]);
+    }
+
+    /**
+     * Изменить приоритет
+     */
+    protected function setPriority(AutomationAction $action, ServiceRequest $request): void
+    {
+        $priority = $action->config['priority'] ?? null;
+
+        if (!$priority) {
+            return;
+        }
+
+        $request->update([
+            'priority' => $priority
+        ]);
     }
 }
