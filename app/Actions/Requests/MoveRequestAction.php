@@ -9,6 +9,7 @@ use App\Models\StageTransition;
 use App\Services\StageConditionService;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use App\Events\RequestStageChanged;
 
 /**
  * Class MoveRequestAction
@@ -95,6 +96,12 @@ class MoveRequestAction
                     'to_stage_name' => $transition->toStage?->name
                 ]
             ]);
+
+            event(new RequestStageChanged(
+                $request,
+                $fromStageId,
+                $toStageId
+            ));
 
             return $request->fresh();
 
