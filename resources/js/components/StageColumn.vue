@@ -30,7 +30,10 @@
 
                 <div
                     class="request-card"
-                    :class="'priority-' + (element.priority || 'normal')"
+                    :class="[
+                        'priority-' + (element.priority || 'normal'),
+                        slaClass(element)
+                        ]"
                     @click="$emit('open-request', element.id)"
                 >
 
@@ -77,12 +80,41 @@ function onChange(evt) {
         request.id,
         props.stage.id
     )
+}
 
+function slaClass(request) {
+
+    if (request.sla_breached) {
+        return 'sla-breached'
+    }
+
+    if (!request.sla_due_at) {
+        return ''
+    }
+
+    const now = new Date()
+    const due = new Date(request.sla_due_at)
+
+    const diff = (due - now) / 60000
+
+    if (diff < 30) {
+        return 'sla-warning'
+    }
+
+    return ''
 }
 
 </script>
 
 <style>
+.sla-warning{
+    border-right: 5px solid #f59e0b;
+}
+
+.sla-breached{
+    border-right: 5px solid #ef4444;
+}
+
 /* LOW */
 .priority-low{
     border-left: 5px solid #9ca3af;
