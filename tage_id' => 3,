@@ -1,9 +1,0 @@
-[90m= [39m[34;4mApp\Models\StageTransition[39;24m {#5425
-    [34mpipeline_id[39m: [35m1[39m,
-    [34mfrom_stage_id[39m: [35m3[39m,
-    [34mto_stage_id[39m: [35m2[39m,
-    [34mupdated_at[39m: "[32m2026-03-16 06:19:09[39m",
-    [34mcreated_at[39m: "[32m2026-03-16 06:19:09[39m",
-    [34mid[39m: [35m6[39m,
-  }
-
