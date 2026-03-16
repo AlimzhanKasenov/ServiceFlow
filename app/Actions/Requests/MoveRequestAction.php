@@ -2,109 +2,60 @@
 
 namespace App\Actions\Requests;
 
-use App\Models\RequestActivity;
+use App\Events\RequestStageChanged;
 use App\Models\RequestStageHistory;
 use App\Models\ServiceRequest;
-use App\Models\StageTransition;
-use App\Services\StageConditionService;
+use App\Services\Workflow\StageManager;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
-use App\Events\RequestStageChanged;
 
 /**
- * Class MoveRequestAction
- *
- * Отвечает за перемещение заявки между стадиями workflow.
+ * Перемещение заявки между стадиями workflow
  */
 class MoveRequestAction
 {
-    protected StageConditionService $conditionService;
+    protected StageManager $stageManager;
 
-    public function __construct(StageConditionService $conditionService)
+    public function __construct(StageManager $stageManager)
     {
-        $this->conditionService = $conditionService;
+        $this->stageManager = $stageManager;
     }
 
     /**
-     * Выполнить перемещение заявки
+     * Выполнить переход заявки в новую стадию
      */
-    public function execute(ServiceRequest $request, int $toStageId, ?int $userId = null): ServiceRequest
-    {
-        /**
-         * Ищем переход
-         */
-        $transition = StageTransition::query()
-            ->with(['fromStage', 'toStage', 'conditions'])
-            ->where('pipeline_id', $request->pipeline_id)
-            ->where('from_stage_id', $request->stage_id)
-            ->where('to_stage_id', $toStageId)
-            ->first();
+    public function execute(
+        ServiceRequest $request,
+        int $toStageId,
+        ?int $userId = null
+    ): ServiceRequest {
+        return DB::transaction(function () use ($request, $toStageId, $userId) {
+            $fromStageId = (int) $request->stage_id;
 
-        if (!$transition) {
-            throw new RuntimeException('Переход между стадиями не найден');
-        }
+            if ($fromStageId === $toStageId) {
+                return $request;
+            }
 
-        /**
-         * Проверка условий перехода
-         */
-        if (!$this->conditionService->check($request, $transition)) {
-            throw new RuntimeException('Условия перехода не выполнены');
-        }
+            $this->stageManager->validateTransition($request, $toStageId);
 
-        /**
-         * Если стадия не меняется
-         */
-        if ($request->stage_id == $toStageId) {
-            return $request->fresh();
-        }
+            $request->stage_id = $toStageId;
+            $request->save();
 
-        return DB::transaction(function () use ($request, $toStageId, $transition, $userId) {
-
-            $fromStageId = $request->stage_id;
-
-            /**
-             * Меняем стадию заявки
-             */
-            $request->update([
-                'stage_id' => $toStageId
-            ]);
-
-            /**
-             * Пишем историю перехода
-             */
             RequestStageHistory::create([
                 'request_id' => $request->id,
                 'from_stage_id' => $fromStageId,
                 'to_stage_id' => $toStageId,
                 'user_id' => $userId,
-                'moved_at' => now()
-            ]);
-
-            /**
-             * Пишем activity
-             */
-            RequestActivity::create([
-                'request_id' => $request->id,
-                'user_id' => $userId,
-                'type' => 'stage_changed',
-                'data' => [
-                    'transition_id' => $transition->id,
-                    'transition_name' => $transition->name,
-                    'from_stage_id' => $fromStageId,
-                    'to_stage_id' => $toStageId,
-                    'from_stage_name' => $transition->fromStage?->name,
-                    'to_stage_name' => $transition->toStage?->name
-                ]
+                'moved_at' => now(),
             ]);
 
             event(new RequestStageChanged(
-                $request,
+                $request->fresh(),
                 $fromStageId,
                 $toStageId
             ));
 
             return $request->fresh();
-
         });
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Workflow;
+namespace App\Services\Workflow;
 
 use App\Models\ServiceRequest;
 

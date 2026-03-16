@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Actions\Requests\MoveRequestAction;
 use App\Http\Controllers\Controller;
 use App\Models\ServiceRequest;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use RuntimeException;
 
 class RequestMoveController extends Controller
@@ -19,31 +19,31 @@ class RequestMoveController extends Controller
         ServiceRequest $req,
         MoveRequestAction $moveAction
     ): JsonResponse {
-
         $validated = $request->validate([
-            'stage_id' => ['required', 'exists:stages,id']
+            'stage_id' => ['required', 'exists:stages,id'],
         ]);
 
         try {
-
             $updatedRequest = $moveAction->execute(
                 $req,
-                $validated['stage_id'],
-                auth()->id()
+                (int) $validated['stage_id'],
+                1
             );
 
             return response()->json([
                 'success' => true,
-                'request' => $updatedRequest
+                'request' => $updatedRequest,
             ]);
-
         } catch (RuntimeException $e) {
-
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
-
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 }

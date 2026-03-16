@@ -255,11 +255,11 @@
 
                     <div
                         v-for="activity in activities"
-                        :key="activity.id"
+                        :key="activity.type + '-' + activity.id"
                         class="history-item"
                     >
 
-                        <div v-if="activity.type === 'stage_changed'">
+                        <div v-if="activity.type === 'stage_change'">
 
                             <b>{{ activity.user?.name }}</b>
 
@@ -267,11 +267,11 @@
 
                             <br>
 
-                            {{ activity.data.from_stage }}
+                            {{ activity.data?.from_stage || '' }}
 
                             →
 
-                            {{ activity.data.to_stage }}
+                            {{ activity.data?.to_stage || '' }}
 
                             <div class="time">
 
@@ -339,7 +339,7 @@ const emit = defineEmits([
 ])
 
 const commentText = ref("")
-
+const activities = ref(props.request.activities || [])
 const editableTitle = ref(props.request.title || "")
 const editablePriority = ref(props.request.priority || "normal")
 const initialTitle = props.request.title
@@ -352,7 +352,6 @@ const stages = ref([])
 const selectedStage = ref(props.request.stage_id)
 
 const comments = ref(props.request.comments || [])
-const activities = ref(props.request.activities || [])
 
 const showAllComments = ref(false)
 
@@ -373,6 +372,7 @@ function formatDate(date){
 }
 
 onMounted(async ()=>{
+
     const res = await axios.get(
         `/api/pipelines/${props.request.pipeline_id}/stages`
     )
@@ -381,6 +381,14 @@ onMounted(async ()=>{
 
     const usersRes = await axios.get('/api/users')
     users.value = usersRes.data
+
+    // загрузка истории действий
+    const activitiesRes = await axios.get(
+        `/api/requests/${props.request.id}/activities`
+    )
+
+    activities.value = activitiesRes.data
+
 })
 
 async function sendComment(){
@@ -425,6 +433,12 @@ async function saveRequest(){
                     stage_id:selectedStage.value
                 }
             )
+
+            const res = await axios.get(
+                `/api/requests/${props.request.id}/activities`
+            )
+
+            activities.value = res.data
 
         }
 

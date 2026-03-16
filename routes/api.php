@@ -23,40 +23,23 @@ use App\Http\Controllers\Api\TransitionController;
 */
 Route::prefix('requests')->group(function () {
 
-    // список заявок
-    Route::get('/', [RequestController::class, 'index'])
-        ->middleware('permission:request.view');
+    Route::get('/', [RequestController::class, 'index']);
 
-    // создание заявки
-    Route::post('/', [RequestController::class, 'store'])
-        ->middleware('permission:request.create');
+    Route::post('/', [RequestController::class, 'store']);
 
-    // просмотр заявки
-    Route::get('/{id}', [RequestController::class, 'show'])
-        ->middleware('permission:request.view');
+    Route::get('/{id}', [RequestController::class, 'show']);
 
-    // назначение исполнителя
-    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign'])
-        ->middleware('permission:request.assign');
+    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign']);
 
-    // перемещение стадии
-    Route::post('/{req}/move', [RequestMoveController::class, 'move'])
-        ->middleware('permission:request.move');
+    Route::post('/{req}/move', [RequestMoveController::class, 'move']);
 
-    // комментарии
-    Route::get('/{id}/comments', [RequestCommentController::class, 'index'])
-        ->middleware('permission:request.view');
+    Route::get('/{id}/comments', [RequestCommentController::class, 'index']);
 
-    Route::post('/{id}/comments', [RequestCommentController::class, 'store'])
-        ->middleware('permission:request.comment');
+    Route::post('/{id}/comments', [RequestCommentController::class, 'store']);
 
-    // история действий
-    Route::get('/{id}/activities', [RequestActivityController::class, 'index'])
-        ->middleware('permission:request.view');
+    Route::get('/{id}/activities', [RequestActivityController::class, 'index']);
 
-    // обновление заявки
-    Route::patch('/{serviceRequest}', [RequestController::class, 'update'])
-        ->middleware('permission:request.move');
+    Route::patch('/{serviceRequest}', [RequestController::class, 'update']);
 
 });
 

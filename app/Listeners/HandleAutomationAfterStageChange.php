@@ -20,7 +20,7 @@ class HandleAutomationAfterStageChange
     public function handle(RequestStageChanged $event): void
     {
         $this->engine->handle(
-            'stage_enter',
+            'stage_changed',
             $event->request
         );
     }
