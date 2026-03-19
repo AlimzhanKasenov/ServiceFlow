@@ -4,7 +4,10 @@
 
         <div
             class="card"
-            :class="'priority-card-' + (editablePriority || 'normal')"
+            :class="[
+                'priority-card-' + (editablePriority || 'normal'),
+                slaClass(request)
+                ]"
         >
 
             <!-- HEADER -->
@@ -133,6 +136,20 @@
 
                             </div>
 
+                        </div>
+
+                        <div class="meta-item" v-if="request.sla_due_at">
+                            <label>SLA</label>
+                            <div class="badge">
+                                {{ formatSLA(request.sla_due_at) }}
+                            </div>
+                        </div>
+
+                        <div class="meta-item" v-else>
+                            <label>SLA</label>
+                            <div class="sla-empty">
+                                SLA не задан
+                            </div>
                         </div>
 
                     </div>
@@ -365,6 +382,48 @@ const visibleComments = computed(() => {
 
 })
 
+function formatSLA(date) {
+
+    const now = new Date()
+    const due = new Date(date)
+
+    const diff = Math.floor((due - now) / 60000)
+
+    if (diff < 0) {
+        return 'просрочено'
+    }
+
+    if (diff < 60) {
+        return diff + ' мин'
+    }
+
+    const hours = Math.floor(diff / 60)
+
+    return hours + ' ч'
+}
+
+function slaClass(request) {
+
+    if (!request?.sla_due_at) {
+        return ''
+    }
+
+    if (request.sla_breached) {
+        return 'sla-breached'
+    }
+
+    const now = new Date()
+    const due = new Date(request.sla_due_at)
+
+    const diff = (due - now) / 60000
+
+    if (diff < 30) {
+        return 'sla-warning'
+    }
+
+    return 'sla-ok'
+}
+
 function formatDate(date){
     if(!date) return ""
 
@@ -504,6 +563,18 @@ async function saveRequest(){
     margin-top:10px;
 }
 
+.sla-ok {
+    border-right: 6px solid #22c55e;
+}
+
+.sla-warning {
+    border-right: 6px solid #f59e0b;
+}
+
+.sla-breached {
+    border-right: 6px solid #ef4444;
+}
+
 .comments-toggle button{
     background:#e5e7eb;
     border:none;
@@ -584,6 +655,11 @@ async function saveRequest(){
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
+}
+
+.sla-empty{
+    font-size:12px;
+    color:#9ca3af;
 }
 
 .request-id{
