@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->unique(['request_id', 'user_id']); // чтобы не дублировать
         });
+        
     }
 
     public function down(): void
