@@ -19,9 +19,7 @@ class HandleAutomationAfterStageChange
 
     public function handle(RequestStageChanged $event): void
     {
-        $this->engine->handle(
-            'stage_changed',
-            $event->request
-        );
+        app(\App\Services\Automation\AutomationEngine::class)
+            ->handleStageChanged($event->request);
     }
 }

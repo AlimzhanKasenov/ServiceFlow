@@ -3,36 +3,43 @@
 namespace App\Services\Automation;
 
 use App\Models\ServiceRequest;
-use App\Models\AutomationAction;
-use App\Models\RequestActivity;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class AutomationService
  *
- * Выполняет действия автоматизации.
+ * Выполняет действия automation
  */
 class AutomationService
 {
-    public function execute(AutomationAction $action, ServiceRequest $request): void
+    /**
+     * Выполнить действие
+     */
+    public function execute($action, ServiceRequest $request): void
     {
-        match ($action->type) {
+        Log::info('AutomationService: execute action', [
+            'type' => $action->type,
+            'config' => $action->config
+        ]);
 
-            'assign_user' => $this->assignUser($action, $request),
+        switch ($action->type) {
 
-            'add_comment' => $this->addComment($action, $request),
+            case 'assign_user':
+                $this->assignUser($request, $action->config);
+                break;
 
-            'set_priority' => $this->setPriority($action, $request),
-
-            default => null
-        };
+            case 'change_priority':
+                $this->changePriority($request, $action->config);
+                break;
+        }
     }
 
     /**
-     * Назначить пользователя
+     * Назначение пользователя
      */
-    protected function assignUser(AutomationAction $action, ServiceRequest $request): void
+    protected function assignUser(ServiceRequest $request, array $config): void
     {
-        $userId = $action->config['user_id'] ?? null;
+        $userId = $config['user_id'] ?? null;
 
         if (!$userId) {
             return;
@@ -44,26 +51,11 @@ class AutomationService
     }
 
     /**
-     * Добавить комментарий
+     * Смена приоритета
      */
-    protected function addComment(AutomationAction $action, ServiceRequest $request): void
+    protected function changePriority(ServiceRequest $request, array $config): void
     {
-        RequestActivity::create([
-            'request_id' => $request->id,
-            'user_id' => 1,
-            'type' => 'automation_comment',
-            'data' => [
-                'message' => $action->config['message'] ?? 'Automation message'
-            ]
-        ]);
-    }
-
-    /**
-     * Изменить приоритет
-     */
-    protected function setPriority(AutomationAction $action, ServiceRequest $request): void
-    {
-        $priority = $action->config['priority'] ?? null;
+        $priority = $config['priority'] ?? null;
 
         if (!$priority) {
             return;

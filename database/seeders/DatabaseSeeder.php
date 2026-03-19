@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         */
 
         $this->call([
-
+            AutomationSeeder::class,
             PermissionsSeeder::class,
             RolesSeeder::class,
             RolePermissionSeeder::class
