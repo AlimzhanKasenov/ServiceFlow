@@ -62,6 +62,7 @@
                             <select
                                 v-model="selectedStage"
                                 @change="changeStage"
+                                :disabled="isReadonly"
                                 class="stage-select"
                             >
 
@@ -88,6 +89,7 @@
 
                                 <select
                                     v-model="editablePriority"
+                                    :disabled="isReadonly"
                                     class="stage-select"
                                 >
                                     <option value="low">low</option>
@@ -108,6 +110,7 @@
                             <select
                                 v-model="selectedAssignee"
                                 @change="changeAssignee"
+                                :disabled="isReadonly"
                                 class="stage-select"
                             >
 
@@ -235,7 +238,7 @@
                     <div class="actions">
 
                         <button
-                            v-if="hasChanges"
+                            v-if="hasChanges && !isReadonly"
                             class="save"
                             @click="saveRequest"
                         >
@@ -372,6 +375,8 @@ const comments = ref(props.request.comments || [])
 
 const showAllComments = ref(false)
 
+const isReadonly = ref(false)
+
 const visibleComments = computed(() => {
 
     if (showAllComments.value) {
@@ -447,7 +452,8 @@ onMounted(async ()=>{
     )
 
     activities.value = activitiesRes.data
-
+    //Временно
+    isReadonly.value = false
 })
 
 async function sendComment(){

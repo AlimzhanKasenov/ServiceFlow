@@ -84,12 +84,12 @@ function onChange(evt) {
 
 function slaClass(request) {
 
-    if (request.sla_breached) {
-        return 'sla-breached'
+    if (!request?.sla_due_at) {
+        return ''
     }
 
-    if (!request.sla_due_at) {
-        return ''
+    if (request.sla_breached) {
+        return 'sla-breached'
     }
 
     const now = new Date()
@@ -97,16 +97,24 @@ function slaClass(request) {
 
     const diff = (due - now) / 60000
 
+    if (diff < 0) {
+        return 'sla-breached'
+    }
+
     if (diff < 30) {
         return 'sla-warning'
     }
 
-    return ''
+    return 'sla-ok' // ← ВОТ ЭТОГО НЕ ХВАТАЛО
 }
 
 </script>
 
 <style>
+.sla-ok{
+    border-right: 5px solid #22c55e;
+}
+
 .sla-warning{
     border-right: 5px solid #f59e0b;
 }

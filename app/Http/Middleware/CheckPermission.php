@@ -4,32 +4,67 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use App\Models\ServiceRequest;
+use App\Models\User;
 
+/**
+ * Проверка прав доступа к заявке
+ */
 class CheckPermission
 {
-    /**
-     * Проверка permission пользователя
-     */
-    public function handle(Request $request, Closure $next, string $permission)
+    public function handle(Request $request, Closure $next)
     {
-        $user = $request->user();
+        // 🔥 DEV РЕЖИМ — берём первого пользователя
+        $user = User::first();
 
         if (!$user) {
-
             return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
-
+                'error' => 'Нет пользователей'
+            ], 500);
         }
 
-        if (!$user->hasPermission($permission)) {
+        // получаем заявку
+        $requestId = $request->route('id')
+            ?? $request->route('serviceRequest')
+            ?? $request->route('req');
+
+        $serviceRequest = ServiceRequest::find($requestId);
+
+        if (!$serviceRequest) {
+            return $next($request); // пропускаем если не про заявку
+        }
+
+        // 👑 админ (пока считаем user_id=1 админом)
+        if ($user->id === 1) {
+            return $next($request);
+        }
+
+        // 🧑‍💼 исполнитель
+        if ($serviceRequest->assigned_to === $user->id) {
+            return $next($request);
+        }
+
+        // 👁 watcher
+        if ($serviceRequest->watchers()
+            ->where('user_id', $user->id)
+            ->exists()
+        ) {
+            if ($request->isMethod('get')) {
+                return $next($request);
+            }
 
             return response()->json([
-                'message' => 'Permission denied'
+                'error' => 'Только просмотр (watcher)'
             ], 403);
-
         }
 
-        return $next($request);
+        // 👤 создатель
+        if ($serviceRequest->created_by === $user->id) {
+            return $next($request);
+        }
+
+        return response()->json([
+            'error' => 'Нет доступа'
+        ], 403);
     }
 }

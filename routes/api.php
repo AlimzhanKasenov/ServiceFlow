@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\UserController;
+use App\Http\Middleware\CheckPermission;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\RequestController;
@@ -27,19 +28,17 @@ Route::prefix('requests')->group(function () {
 
     Route::post('/', [RequestController::class, 'store']);
 
-    Route::get('/{id}', [RequestController::class, 'show']);
+    Route::get('/{id}', [RequestController::class, 'show'])
+        ->middleware(CheckPermission::class);
 
-    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign']);
+    Route::patch('/{serviceRequest}', [RequestController::class, 'update'])
+        ->middleware(CheckPermission::class);
 
-    Route::post('/{req}/move', [RequestMoveController::class, 'move']);
+    Route::post('/{req}/move', [RequestMoveController::class, 'move'])
+        ->middleware(CheckPermission::class);
 
-    Route::get('/{id}/comments', [RequestCommentController::class, 'index']);
-
-    Route::post('/{id}/comments', [RequestCommentController::class, 'store']);
-
-    Route::get('/{id}/activities', [RequestActivityController::class, 'index']);
-
-    Route::patch('/{serviceRequest}', [RequestController::class, 'update']);
+    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign'])
+        ->middleware(CheckPermission::class);
 
 });
 
