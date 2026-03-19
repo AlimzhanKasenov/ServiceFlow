@@ -9,6 +9,7 @@ use App\Models\StageTransition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\RequestStageHistory;
 
 class RequestController extends Controller
 {
@@ -67,6 +68,14 @@ class RequestController extends Controller
      */
     public function move(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
+        $userId = 1;
+
+        if ($serviceRequest->assigned_to && $serviceRequest->assigned_to != $userId) {
+            return response()->json([
+                'error' => 'Только исполнитель может менять стадию'
+            ], 403);
+        }
+
         $data = $request->validate([
             'stage_id' => ['required', 'exists:stages,id']
         ]);
@@ -91,12 +100,12 @@ class RequestController extends Controller
         /**
          * Логируем изменение стадии
          */
-        AuditLog::create([
+        RequestStageHistory::create([
             'request_id' => $serviceRequest->id,
-            'action' => 'stage_changed',
             'from_stage_id' => $fromStageId,
             'to_stage_id' => $toStageId,
-            'user_id' => 1
+            'user_id' => 1,
+            'moved_at' => now()
         ]);
 
         return response()->json([
@@ -119,17 +128,38 @@ class RequestController extends Controller
             'activities.user'
         ])->findOrFail($id);
 
+        $user = auth()->user();
+
+        // если нет авторизации — временно считаем user_id = 1
+        $userId = $user?->id ?? 1;
+
+        $isCreator = $request->created_by === $userId;
+        $isAssignee = $request->assigned_to === $userId;
+
+        $request->can_edit_title = $isCreator;
+        $request->can_change_stage = $isAssignee;
+        $request->can_change_priority = $isCreator || $isAssignee;
+        $request->can_change_assignee = $isCreator || $isAssignee;
+
         return response()->json($request);
     }
 
     /**
      * Назначить исполнителя заявки
      */
-    /**
-     * Назначить исполнителя заявки
-     */
     public function assign(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
+        $userId = 1;
+
+        $isCreator = $serviceRequest->created_by == $userId;
+        $isAssignee = $serviceRequest->assigned_to == $userId;
+
+        if (!$isCreator && !$isAssignee) {
+            return response()->json([
+                'error' => 'Нет прав менять исполнителя'
+            ], 403);
+        }
+
         $data = $request->validate([
             'user_id' => ['nullable', 'exists:users,id']
         ]);
@@ -166,10 +196,22 @@ class RequestController extends Controller
      */
     public function update(Request $request, ServiceRequest $serviceRequest)
     {
-        $data = $request->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'priority' => ['nullable', 'string']
-        ]);
+        $userId = 1;
+
+        $isCreator = $serviceRequest->created_by == $userId;
+        $isAssignee = $serviceRequest->assigned_to == $userId;
+
+        $data = [];
+
+        // ✏️ title — только creator
+        if ($request->has('title') && $isCreator) {
+            $data['title'] = $request->input('title');
+        }
+
+        // ⚡ priority — creator + assignee
+        if ($request->has('priority') && ($isCreator || $isAssignee)) {
+            $data['priority'] = $request->input('priority');
+        }
 
         $serviceRequest->update($data);
 

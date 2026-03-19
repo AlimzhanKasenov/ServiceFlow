@@ -18,6 +18,7 @@
 
                     <input
                         v-model="editableTitle"
+                        :disabled="!request.can_edit_title"
                         class="title-input"
                         placeholder="Название заявки"
                     />
@@ -62,7 +63,7 @@
                             <select
                                 v-model="selectedStage"
                                 @change="changeStage"
-                                :disabled="isReadonly"
+                                :disabled="!request.can_change_stage"
                                 class="stage-select"
                             >
 
@@ -89,7 +90,7 @@
 
                                 <select
                                     v-model="editablePriority"
-                                    :disabled="isReadonly"
+                                    :disabled="!request.can_change_priority"
                                     class="stage-select"
                                 >
                                     <option value="low">low</option>
@@ -110,7 +111,7 @@
                             <select
                                 v-model="selectedAssignee"
                                 @change="changeAssignee"
-                                :disabled="isReadonly"
+                                :disabled="!request.can_change_assignee"
                                 class="stage-select"
                             >
 
@@ -238,7 +239,12 @@
                     <div class="actions">
 
                         <button
-                            v-if="hasChanges && !isReadonly"
+                            v-if="hasChanges && (
+    request.can_edit_title ||
+    request.can_change_priority ||
+    request.can_change_stage ||
+    request.can_change_assignee
+)"
                             class="save"
                             @click="saveRequest"
                         >
@@ -375,8 +381,6 @@ const comments = ref(props.request.comments || [])
 
 const showAllComments = ref(false)
 
-const isReadonly = ref(false)
-
 const visibleComments = computed(() => {
 
     if (showAllComments.value) {
@@ -452,8 +456,6 @@ onMounted(async ()=>{
     )
 
     activities.value = activitiesRes.data
-    //Временно
-    isReadonly.value = false
 })
 
 async function sendComment(){

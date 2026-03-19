@@ -36,7 +36,7 @@ class MoveRequestAction
                 return $request;
             }
 
-            $this->stageManager->validateTransition($request, $toStageId);
+            //$this->stageManager->validateTransition($request, $toStageId);
 
             $request->stage_id = $toStageId;
             $request->save();
@@ -48,13 +48,13 @@ class MoveRequestAction
                 'user_id' => $userId,
                 'moved_at' => now(),
             ]);
-
+/*
             event(new RequestStageChanged(
                 $request->fresh(),
                 $fromStageId,
                 $toStageId
             ));
-
+*/
             return $request->fresh();
         });
     }

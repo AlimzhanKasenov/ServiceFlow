@@ -28,17 +28,19 @@ Route::prefix('requests')->group(function () {
 
     Route::post('/', [RequestController::class, 'store']);
 
-    Route::get('/{id}', [RequestController::class, 'show'])
-        ->middleware(CheckPermission::class);
+    Route::get('/{id}', [RequestController::class, 'show']);
 
-    Route::patch('/{serviceRequest}', [RequestController::class, 'update'])
-        ->middleware(CheckPermission::class);
+    Route::patch('/{serviceRequest}', [RequestController::class, 'update']);
 
-    Route::post('/{req}/move', [RequestMoveController::class, 'move'])
-        ->middleware(CheckPermission::class);
+    Route::post('/{req}/move', [RequestMoveController::class, 'move']);
 
-    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign'])
-        ->middleware(CheckPermission::class);
+    Route::post('/{serviceRequest}/assign', [RequestController::class, 'assign']);
+
+    Route::get('/{id}/activities', [RequestActivityController::class, 'index']);
+
+    Route::get('/{id}/comments', [RequestCommentController::class, 'index']);
+
+    Route::post('/{id}/comments', [RequestCommentController::class, 'store']);
 
 });
 
