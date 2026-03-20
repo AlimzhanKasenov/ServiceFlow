@@ -135,7 +135,7 @@ function onChange(evt) {
      * откатываем карточку назад и ничего не сохраняем
      */
     if (!request.allowed_transitions.includes(props.stage.id)) {
-        store.loadBoard()
+        store.loadPipeline()
         return
     }
 
@@ -224,8 +224,8 @@ function slaClass(request) {
 }
 
 .stage-blocked {
-    background: #fef2f2;
-    box-shadow: inset 0 0 0 2px #ef4444;
+    background: #eff6ff;
+    box-shadow: inset 0 0 0 2px #3b82f6;
 }
 
 .stage-header {
