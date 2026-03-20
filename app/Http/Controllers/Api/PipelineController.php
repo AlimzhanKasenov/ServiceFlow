@@ -36,6 +36,17 @@ class PipelineController extends Controller
             'stages.requests'
         ])->findOrFail($id);
 
+        /**
+         * Добавляем allowed_transitions в каждую заявку
+         */
+        $stageManager = app(\App\Services\Workflow\StageManager::class);
+
+        foreach ($pipeline->stages as $stage) {
+            foreach ($stage->requests as $request) {
+                $request->allowed_transitions = $stageManager->getAllowedTransitions($request);
+            }
+        }
+
         return response()->json($pipeline);
     }
 }

@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AuditLog;
 use App\Models\ServiceRequest;
-use App\Models\StageTransition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use App\Models\RequestStageHistory;
+use App\Services\Workflow\StageManager;
 
 class RequestController extends Controller
 {
@@ -108,9 +106,14 @@ class RequestController extends Controller
             'moved_at' => now()
         ]);
 
+        $serviceRequest = $serviceRequest->fresh();
+
+        $stageManager = app(\App\Services\Workflow\StageManager::class);
+        $serviceRequest->allowed_transitions = $stageManager->getAllowedTransitions($serviceRequest);
+
         return response()->json([
             'success' => true,
-            'request' => $serviceRequest->fresh()
+            'request' => $serviceRequest
         ]);
     }
 
@@ -127,6 +130,9 @@ class RequestController extends Controller
             'comments.user',
             'activities.user'
         ])->findOrFail($id);
+
+        $stageManager = app(StageManager::class);
+        $request->allowed_transitions = $stageManager->getAllowedTransitions($request);
 
         $user = auth()->user();
 

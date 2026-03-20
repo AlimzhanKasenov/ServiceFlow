@@ -47,4 +47,16 @@ class StageManager
          */
         $this->validator->validate($request, $transition);
     }
+
+    /**
+     * Получить список доступных переходов
+     */
+    public function getAllowedTransitions(ServiceRequest $request): array
+    {
+        return StageTransition::query()
+            ->where('pipeline_id', $request->pipeline_id)
+            ->where('from_stage_id', $request->stage_id)
+            ->pluck('to_stage_id')
+            ->toArray();
+    }
 }
